@@ -53,6 +53,7 @@ public class UsuarioController {
         return ResponseEntity.status(status.value()).build();
     }
 
+    @DeleteMapping("/{usuario}/{login}")
     public ResponseEntity<Void> deleteUsuario(
             @PathVariable("usuario") String usuario,
             @PathVariable("login") String login

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>br.com.fiap.horadoprato</groupId>
 	<artifactId>horadoprato</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>hora-do-prato</name>
 	<description>Hora do Prato</description>
 	<url/>
@@ -33,6 +33,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

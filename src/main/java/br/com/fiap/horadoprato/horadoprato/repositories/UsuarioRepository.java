@@ -1,17 +1,20 @@
 package br.com.fiap.horadoprato.horadoprato.repositories;
 
-import br.com.fiap.horadoprato.horadoprato.entities.Usuario;
+import br.com.fiap.horadoprato.horadoprato.model.Usuario;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
-public interface UsuarioRepository {
+@Repository
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    Optional<Usuario> findByUsuario(String usuario,String login);
+    boolean existsByEmail(String email);
 
-    Integer saveUsuario(Usuario usuario);
+    boolean existsByLogin(String login);
 
-    Integer upateUsuario(Usuario usuario, String updateUsuario,String updateLogin);
+    List<Usuario> findByNomeContainingIgnoreCase(String nome);
 
-    Integer deleteUsuario(String usuario,String login);
-
+    Optional<Usuario> findByLogin(String login);
 }

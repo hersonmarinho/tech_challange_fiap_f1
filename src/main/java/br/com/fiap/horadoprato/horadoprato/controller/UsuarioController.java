@@ -1,65 +1,47 @@
 package br.com.fiap.horadoprato.horadoprato.controller;
 
-import br.com.fiap.horadoprato.horadoprato.entities.Usuario;
+import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
 import br.com.fiap.horadoprato.horadoprato.services.UsuarioService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.List;
 
 @RestController
-@RequestMapping("/usuario")
+@RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
+    private final UsuarioService service;
 
-    private final UsuarioService usuarioService;
-
-    public UsuarioController(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
-    }
-
-    @GetMapping("/{usuario}/{login}")
-    public ResponseEntity<Optional<Usuario>> findUsuario(
-            @PathVariable("usuario") String usuario,
-            @PathVariable("login") String login
-    ){
-        logger.info("/usuario/"+usuario+"/"+login);
-        var findUsuario = this.usuarioService.findByUsuario(usuario, login);
-        return ResponseEntity.ok(findUsuario);
+    public UsuarioController(UsuarioService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public  ResponseEntity<Void> saveUsuario(
-            @RequestBody Usuario usuario
-    ) {
-        logger.info("POST -> /usuarios");
-        this.usuarioService.saveUsuario(usuario);
-        return ResponseEntity.status(201).build();
+    public ResponseEntity<UsuarioResponseDTO> cadastrar(@RequestBody @Valid UsuarioRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.cadastrar(dto));
     }
 
-    @PutMapping("/{usuario}/{login}")
-    public ResponseEntity<Void> upateUsuario(
-            @PathVariable("usuario")  String updateUsuario,
-            @PathVariable("login")   String updateLogin,
-            @RequestBody Usuario usuario
-    ) {
-        logger.info("PUT -> /usuarios/" + updateUsuario + "/" + updateLogin);
-        this.usuarioService.upateUsuario(usuario, updateUsuario, updateLogin);
-        var status = HttpStatus.NO_CONTENT;
-        return ResponseEntity.status(status.value()).build();
+    @PatchMapping("/{id}/senha")
+    public ResponseEntity<Void> alterarSenha(
+            @PathVariable Long id,
+            @RequestBody @Valid SenhaUpdateDTO dto) {
+        service.alterarSenha(id, dto);
+        return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{usuario}/{login}")
-    public ResponseEntity<Void> deleteUsuario(
-            @PathVariable("usuario") String usuario,
-            @PathVariable("login") String login
-    ){
-        logger.info("DELETE -> /usuario/" + usuario + "/" + login);
-        this.usuarioService.deleteUsuario(usuario, login);
-        return ResponseEntity.ok().build();
+    @GetMapping("/buscar")
+    public ResponseEntity<List<UsuarioResponseDTO>> buscarPorNome(@RequestParam String nome) {
+        return ResponseEntity.ok(service.buscarPorNome(nome));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        service.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

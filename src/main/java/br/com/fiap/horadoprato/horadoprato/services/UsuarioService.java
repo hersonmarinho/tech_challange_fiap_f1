@@ -1,42 +1,81 @@
 package br.com.fiap.horadoprato.horadoprato.services;
 
-import br.com.fiap.horadoprato.horadoprato.entities.Usuario;
+import br.com.fiap.horadoprato.horadoprato.dto.LoginDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
+import br.com.fiap.horadoprato.horadoprato.model.Usuario;
 import br.com.fiap.horadoprato.horadoprato.repositories.UsuarioRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class UsuarioService {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioRepository repository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+    public UsuarioService(UsuarioRepository repository) {
+        this.repository = repository;
     }
 
-    public Optional<Usuario> findByUsuario(String usuario, String login){
-        return usuarioRepository.findByUsuario(usuario,login);
-    }
-
-    public void saveUsuario(Usuario usuario){
-        var save = this.usuarioRepository.saveUsuario(usuario);
-        Assert.state(save == 1, "Erro ao salvar o usuário de nome " + usuario.getNome() + " e login " + usuario.getLogin());
-    }
-
-    public void upateUsuario(Usuario usuario, String updateUsuario,String updateLogin){
-        var update = this.usuarioRepository.upateUsuario(usuario,updateUsuario,updateLogin);
-        if (update == 0) {
-            throw new RuntimeException("Usuário com o nome "  + usuario.getNome() + " e login " + usuario.getLogin() + "não encontrado.");
+    @Transactional
+    public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
+        if (repository.existsByEmail(dto.email())) {
+            throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
         }
-    }
-
-    public void deleteUsuario(String usuario,String login){
-        var delete = this.usuarioRepository.deleteUsuario(usuario,login);
-        if (delete == 0) {
-            throw new RuntimeException("Usuário com o nome "  + usuario + " e login " + login + "não encontrado.");
+        if (repository.existsByLogin(dto.login())) {
+            throw new IllegalArgumentException("Login já está em uso.");
         }
 
+        Usuario usuario = Usuario.builder()
+                .nome(dto.nome())
+                .email(dto.email())
+                .login(dto.login())
+                .senha(dto.senha()) // TODO: precisamos considerar ocultar esse dado
+                .tipoUsuario(dto.tipoUsuario())
+                .endereco(dto.endereco())
+                .build();
+
+        return UsuarioResponseDTO.fromEntity(repository.save(usuario));
+    }
+
+    @Transactional
+    public void alterarSenha(Long id, SenhaUpdateDTO dto) {
+        Usuario usuario = buscarEntityPorId(id);
+
+        if (!usuario.getSenha().equals(dto.senhaAtual())) {
+            throw new IllegalArgumentException("Senha atual incorreta.");
+        }
+
+        usuario.setSenha(dto.novaSenha());
+        repository.save(usuario);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UsuarioResponseDTO> buscarPorNome(String nome) {
+        return repository.findByNomeContainingIgnoreCase(nome)
+                .stream()
+                .map(UsuarioResponseDTO::fromEntity)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean validarLogin(LoginDTO dto) {
+        return repository.findByLogin(dto.login())
+                .map(u -> u.getSenha().equals(dto.senha()))
+                .orElse(false);
+    }
+
+    @Transactional
+    public void deletar(Long id) {
+        Usuario usuario = buscarEntityPorId(id);
+        repository.delete(usuario);
+    }
+
+    private Usuario buscarEntityPorId(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o ID: " + id));
     }
 }

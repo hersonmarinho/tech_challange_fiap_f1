@@ -16,10 +16,10 @@ public class UsuarioRepositoryImpl implements  UsuarioRepository{
     }
 
     @Override
-    public Optional<Usuario> findByUsuario(String usuario,String login) {
+    public Optional<Usuario> findByUsuario(String nome,String login) {
         return jdbcClient
-                .sql("SELECT * FROM usuarios WHERE usuario = :usuario and login = :login")
-                .param("usuario", usuario)
+                .sql("SELECT * FROM usuarios WHERE nome = :nome and login = :login")
+                .param("nome", nome)
                 .param("login", login)
                 .query(Usuario.class)
                 .optional();
@@ -28,13 +28,14 @@ public class UsuarioRepositoryImpl implements  UsuarioRepository{
     @Override
     public Integer saveUsuario(Usuario usuario) {
         return this.jdbcClient
-                .sql("INSERT INTO usuarios (nome, login, senha, email, tipo_usuario, endereco) VALUES (:nome, :login, :senha, :email, :tipo_usuario, :endereco)")
+                .sql("INSERT INTO usuarios (nome, login, senha, email, tipo_usuario, endereco, data_ultima_alteracao) VALUES (:nome, :login, :senha, :email, :tipo_usuario, :endereco, :dataUltimaAlteracao)")
                 .param("nome", usuario.getNome())
                 .param("login", usuario.getLogin())
                 .param("senha", usuario.getSenha())
                 .param("email", usuario.getEmail())
                 .param("tipo_usuario", usuario.getTipoUsuario())
                 .param("endereco", usuario.getEndereco())
+                .param("dataUltimaAlteracao", usuario.getDataUltimaAlteracao())
                 .update();
     }
 

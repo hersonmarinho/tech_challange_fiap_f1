@@ -4,6 +4,7 @@ import br.com.fiap.horadoprato.horadoprato.dto.LoginDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
+import br.com.fiap.horadoprato.horadoprato.infra.security.CriptografiaUtil;
 import br.com.fiap.horadoprato.horadoprato.model.Usuario;
 import br.com.fiap.horadoprato.horadoprato.repositories.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class UsuarioService {
                 .nome(dto.nome())
                 .email(dto.email())
                 .login(dto.login())
-                .senha(dto.senha()) // TODO: precisamos considerar ocultar esse dado
+                .senha(CriptografiaUtil.encriptar(dto.senha())) // TODO: precisamos considerar ocultar esse dado
                 .tipoUsuario(dto.tipoUsuario())
                 .endereco(dto.endereco())
                 .build();
@@ -45,11 +46,11 @@ public class UsuarioService {
     public void alterarSenha(Long id, SenhaUpdateDTO dto) {
         Usuario usuario = buscarEntityPorId(id);
 
-        if (!usuario.getSenha().equals(dto.senhaAtual())) {
+        if (!CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.senhaAtual())) {
             throw new IllegalArgumentException("Senha atual incorreta.");
         }
 
-        usuario.setSenha(dto.novaSenha());
+        usuario.setSenha(CriptografiaUtil.encriptar(dto.novaSenha()));
         repository.save(usuario);
     }
 

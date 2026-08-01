@@ -1,9 +1,12 @@
 package br.com.fiap.horadoprato.horadoprato.services;
 
-import br.com.fiap.horadoprato.horadoprato.dto.LoginDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.exception.EmailJaCadastradoException;
+import br.com.fiap.horadoprato.horadoprato.dto.exception.LoginJaCadastradoException;
+import br.com.fiap.horadoprato.horadoprato.dto.exception.SenhaJaCadastradaException;
+import br.com.fiap.horadoprato.horadoprato.dto.exception.UsuarioNaoEncontradoException;
 import br.com.fiap.horadoprato.horadoprato.infra.security.CriptografiaUtil;
 import br.com.fiap.horadoprato.horadoprato.model.Usuario;
 import br.com.fiap.horadoprato.horadoprato.repositories.UsuarioRepository;
@@ -24,10 +27,10 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
         if (repository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
+            throw new EmailJaCadastradoException("Este e-mail já esta cadastrado no sistema!");
         }
         if (repository.existsByLogin(dto.login())) {
-            throw new IllegalArgumentException("Login já está em uso.");
+            throw new LoginJaCadastradoException("Este login já esta cadastrado no sistema!");
         }
 
         Usuario usuario = Usuario.builder()
@@ -46,8 +49,8 @@ public class UsuarioService {
     public void alterarSenha(Long id, SenhaUpdateDTO dto) {
         Usuario usuario = buscarEntityPorId(id);
 
-        if (!CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.senhaAtual())) {
-            throw new IllegalArgumentException("Senha atual incorreta.");
+        if (CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.senhaAtual())) {
+            throw new SenhaJaCadastradaException("A senha digitada é igual a senha anterior!");
         }
 
         usuario.setSenha(CriptografiaUtil.encriptar(dto.novaSenha()));
@@ -62,12 +65,12 @@ public class UsuarioService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    /*@Transactional(readOnly = true)
     public boolean validarLogin(LoginDTO dto) {
         return repository.findByLogin(dto.login())
-                .map(u -> u.getSenha().equals(dto.senha()))
+                .map(u -> u.getSenha().equals(CriptografiaUtil.encriptar(dto.senha())))
                 .orElse(false);
-    }
+    }*/
 
     @Transactional
     public void deletar(Long id) {
@@ -77,6 +80,6 @@ public class UsuarioService {
 
     private Usuario buscarEntityPorId(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário com o id " + id + "não encontrado!"));
     }
 }

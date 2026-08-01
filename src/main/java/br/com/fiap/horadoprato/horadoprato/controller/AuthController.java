@@ -1,6 +1,7 @@
 package br.com.fiap.horadoprato.horadoprato.controller;
 
 import br.com.fiap.horadoprato.horadoprato.dto.LoginDTO;
+import br.com.fiap.horadoprato.horadoprato.services.AuthService;
 import br.com.fiap.horadoprato.horadoprato.services.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UsuarioService service;
+    private final AuthService service;
 
-    public AuthController(UsuarioService service) {
+    public AuthController(AuthService service) {
         this.service = service;
     }
 

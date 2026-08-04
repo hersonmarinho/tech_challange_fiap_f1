@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     tipo_usuario VARCHAR(50) NOT NULL,
 
     -- Campos embutidos de Endereco (@Embeddable)
-    rua VARCHAR(255) NOT NULL,
+    logradouro VARCHAR(255) NOT NULL,
     numero VARCHAR(50) NOT NULL,
     complemento VARCHAR(255),
     cidade VARCHAR(255) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 -- Inserção de Dono de Restaurante
 INSERT INTO usuarios (
     nome, email, login, senha, tipo_usuario,
-    rua, numero, complemento, cidade, estado, cep,
+    logradouro, numero, complemento, cidade, estado, cep,
     data_ultima_alteracao
 ) VALUES (
              'Carlos Oliveira',
@@ -43,7 +43,7 @@ INSERT INTO usuarios (
 -- Inserção de Cliente
 INSERT INTO usuarios (
     nome, email, login, senha, tipo_usuario,
-    rua, numero, complemento, cidade, estado, cep,
+    logradouro, numero, complemento, cidade, estado, cep,
     data_ultima_alteracao
 ) VALUES (
              'Mariana Silva',

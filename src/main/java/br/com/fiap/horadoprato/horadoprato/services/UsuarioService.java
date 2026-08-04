@@ -26,11 +26,11 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
-        if (repository.existsByEmail(dto.email())) {
-            throw new EmailJaCadastradoException("Este e-mail já esta cadastrado no sistema!");
-        }
         if (repository.existsByLogin(dto.login())) {
             throw new LoginJaCadastradoException("Este login já esta cadastrado no sistema!");
+        }
+        if (repository.existsByEmail(dto.email())) {
+            throw new EmailJaCadastradoException("Este e-mail já esta cadastrado no sistema!");
         }
 
         Usuario usuario = Usuario.builder()

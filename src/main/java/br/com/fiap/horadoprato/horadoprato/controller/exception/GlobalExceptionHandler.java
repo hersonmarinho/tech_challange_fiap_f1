@@ -13,16 +13,26 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({EmailJaCadastradoException.class, LoginJaCadastradoException.class, SenhaJaCadastradaException.class})
-    public ResponseEntity<StandardError> handleCadastroJaRealizado(EmailJaCadastradoException ex) {
-        StandardError erro = new StandardError(HttpStatus.CONFLICT.value(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+    @ExceptionHandler({EmailJaCadastradoException.class, SenhaJaCadastradaException.class, LoginJaCadastradoException.class})
+    public ResponseEntity<StandardError> handleCadastroJaRealizado(Exception ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(StandardError.builder()
+                    .status(HttpStatus.CONFLICT.value())
+                    .mensagem(ex.getMessage())
+                    .timestamp(java.time.LocalDateTime.now())
+                    .build());
     }
 
     @ExceptionHandler(UsuarioNaoEncontradoException.class)
     public ResponseEntity<StandardError> handleUsuarioNaoEncontrado(UsuarioNaoEncontradoException ex) {
-        StandardError erro = new StandardError(HttpStatus.NOT_FOUND .value(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND ).body(erro);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(StandardError.builder()
+                        .status(HttpStatus.NOT_FOUND.value())
+                        .mensagem(ex.getMessage())
+                        .timestamp(java.time.LocalDateTime.now())
+                        .build());
     }
 
 

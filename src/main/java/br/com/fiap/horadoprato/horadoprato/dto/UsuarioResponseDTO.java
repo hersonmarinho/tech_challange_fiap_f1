@@ -6,6 +6,7 @@ import br.com.fiap.horadoprato.horadoprato.model.TipoUsuario;
 import br.com.fiap.horadoprato.horadoprato.model.Usuario;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record UsuarioResponseDTO(
         Long id,
@@ -14,7 +15,7 @@ public record UsuarioResponseDTO(
         String login,
         TipoUsuario tipoUsuario,
         Endereco endereco,
-        LocalDate dataUltimaAlteracao
+        LocalDateTime dataUltimaAlteracao
 ) {
     public static UsuarioResponseDTO fromEntity(Usuario usuario) {
         return new UsuarioResponseDTO(

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     estado VARCHAR(100) NOT NULL,
     cep VARCHAR(20) NOT NULL,
 
-    data_ultima_alteracao DATE
+    data_ultima_alteracao TIMESTAMP
     );
 
 -- Inserção de Dono de Restaurante
@@ -37,7 +37,7 @@ INSERT INTO usuarios (
              'São Paulo',
              'SP',
              '01234-567',
-             '2026-07-28'
+             '2026-08-04 21:17:25'
          );
 
 -- Inserção de Cliente
@@ -57,5 +57,5 @@ INSERT INTO usuarios (
              'Campinas',
              'SP',
              '13010-000',
-             '2026-07-28'
+             '2026-08-04 21:17:25'
          );

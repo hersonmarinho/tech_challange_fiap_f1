@@ -3,6 +3,7 @@ package br.com.fiap.horadoprato.horadoprato.services;
 import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.UsuarioUpdateDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.EmailJaCadastradoException;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.LoginJaCadastradoException;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.SenhaJaCadastradaException;
@@ -71,6 +72,19 @@ public class UsuarioService {
                 .map(u -> u.getSenha().equals(CriptografiaUtil.encriptar(dto.senha())))
                 .orElse(false);
     }*/
+
+    @Transactional
+    public void atualizar(long id, UsuarioUpdateDTO dto) {
+
+        Usuario usuario = buscarEntityPorId(id);
+
+        usuario.setNome(dto.nome());
+        usuario.setLogin(dto.login());
+        usuario.setTipoUsuario(dto.tipoUsuario());
+        usuario.setEndereco(dto.endereco());
+
+        repository.save(usuario);
+    }
 
     @Transactional
     public void deletar(Long id) {

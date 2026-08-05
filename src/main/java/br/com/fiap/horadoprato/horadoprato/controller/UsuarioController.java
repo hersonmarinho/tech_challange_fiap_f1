@@ -3,6 +3,7 @@ package br.com.fiap.horadoprato.horadoprato.controller;
 import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.UsuarioUpdateDTO;
 import br.com.fiap.horadoprato.horadoprato.services.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,14 @@ public class UsuarioController {
     @GetMapping("/buscar")
     public ResponseEntity<List<UsuarioResponseDTO>> buscarPorNome(@RequestParam String nome) {
         return ResponseEntity.ok(service.buscarPorNome(nome));
+    }
+
+    @PatchMapping("/{id}/atualizar")
+    public ResponseEntity<Void> atualizar(
+            @PathVariable Long id,
+            @RequestBody @Valid UsuarioUpdateDTO dto) {
+        service.atualizar(id, dto);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

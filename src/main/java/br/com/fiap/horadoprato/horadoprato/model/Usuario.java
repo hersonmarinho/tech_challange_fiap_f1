@@ -3,7 +3,8 @@ package br.com.fiap.horadoprato.horadoprato.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "usuarios")
@@ -37,11 +38,11 @@ public class Usuario {
     private Endereco endereco;
 
     @Column(name = "data_ultima_alteracao")
-    private LocalDate dataUltimaAlteracao;
+    private LocalDateTime dataUltimaAlteracao;
 
     @PrePersist
     @PreUpdate
     public void atualizarDataAlteracao() {
-        this.dataUltimaAlteracao = LocalDate.now();
+        this.dataUltimaAlteracao = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
     }
 }

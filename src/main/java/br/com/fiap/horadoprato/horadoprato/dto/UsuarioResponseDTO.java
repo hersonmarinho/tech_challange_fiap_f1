@@ -9,20 +9,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record UsuarioResponseDTO(
-        Long id,
+        //Long id,
+        String login,
         String nome,
         String email,
-        String login,
         TipoUsuario tipoUsuario,
         Endereco endereco,
         LocalDateTime dataUltimaAlteracao
 ) {
     public static UsuarioResponseDTO fromEntity(Usuario usuario) {
         return new UsuarioResponseDTO(
-                usuario.getId(),
+                //usuario.getId(),
+                usuario.getLogin(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                usuario.getLogin(),
                 usuario.getTipoUsuario(),
                 usuario.getEndereco(),
                 usuario.getDataUltimaAlteracao()

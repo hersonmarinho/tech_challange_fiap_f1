@@ -7,10 +7,10 @@ import jakarta.annotation.Nullable;
 public record UsuarioUpdateDTO(
 
         @Nullable
-        String nome,
+        String login,
 
         @Nullable
-        String login,
+        String nome,
 
         @Nullable
         TipoUsuario tipoUsuario,

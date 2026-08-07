@@ -22,35 +22,35 @@ public class UsuarioController {
         this.service = service;
     }
 
-    @PostMapping
+    @PostMapping("/v1")
     public ResponseEntity<UsuarioResponseDTO> cadastrar(@RequestBody @Valid UsuarioRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.cadastrar(dto));
     }
 
-    @PatchMapping("/{id}/senha")
+    @PatchMapping("/v1/{login}/senha")
     public ResponseEntity<Void> alterarSenha(
-            @PathVariable Long id,
+            @PathVariable String login,
             @RequestBody @Valid SenhaUpdateDTO dto) {
-        service.alterarSenha(id, dto);
+        service.alterarSenha(login, dto);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/buscar")
+    @GetMapping("/v1/buscar")
     public ResponseEntity<List<UsuarioResponseDTO>> buscarPorNome(@RequestParam String nome) {
         return ResponseEntity.ok(service.buscarPorNome(nome));
     }
 
-    @PatchMapping("/{id}/atualizar")
+    @PatchMapping("/v1/{login}/atualizar")
     public ResponseEntity<Void> atualizar(
-            @PathVariable Long id,
+            //@PathVariable String login,
             @RequestBody @Valid UsuarioUpdateDTO dto) {
-        service.atualizar(id, dto);
+        service.atualizar(dto);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        service.deletar(id);
+    @DeleteMapping("/v1/{login}")
+    public ResponseEntity<Void> deletar(@PathVariable String login) {
+        service.deletar(login);
         return ResponseEntity.noContent().build();
     }
 }

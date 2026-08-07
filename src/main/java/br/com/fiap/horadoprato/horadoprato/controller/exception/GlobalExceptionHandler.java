@@ -1,41 +1,33 @@
 package br.com.fiap.horadoprato.horadoprato.controller.exception;
 
-import br.com.fiap.horadoprato.horadoprato.dto.error.StandardError;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.EmailJaCadastradoException;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.LoginJaCadastradoException;
-import br.com.fiap.horadoprato.horadoprato.dto.exception.SenhaJaCadastradaException;
+import br.com.fiap.horadoprato.horadoprato.dto.exception.CadastrodeSenhaException;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.UsuarioNaoEncontradoException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({EmailJaCadastradoException.class, SenhaJaCadastradaException.class, LoginJaCadastradoException.class})
-    public ResponseEntity<StandardError> handleCadastroJaRealizado(Exception ex) {
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(StandardError.builder()
-                    .status(HttpStatus.CONFLICT.value())
-                    .mensagem(ex.getMessage())
-                    .timestamp(java.time.LocalDateTime.now())
-                    .build());
+    @ExceptionHandler({EmailJaCadastradoException.class, CadastrodeSenhaException.class, LoginJaCadastradoException.class})
+    public ProblemDetail handleCadastroJaRealizado(Exception ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problemDetail.setTitle("Conflito de cadastro");
+        problemDetail.setProperty("timestamp", java.time.LocalDateTime.now());
+
+        return problemDetail;
     }
 
     @ExceptionHandler(UsuarioNaoEncontradoException.class)
-    public ResponseEntity<StandardError> handleUsuarioNaoEncontrado(UsuarioNaoEncontradoException ex) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(StandardError.builder()
-                        .status(HttpStatus.NOT_FOUND.value())
-                        .mensagem(ex.getMessage())
-                        .timestamp(java.time.LocalDateTime.now())
-                        .build());
+    public ProblemDetail handleUsuarioNaoEncontrado(UsuarioNaoEncontradoException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problemDetail.setTitle("Cadastro não encontrado");
+        problemDetail.setProperty("timestamp", java.time.LocalDateTime.now());
+
+        return problemDetail;
     }
-
-
-
 
 }

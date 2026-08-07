@@ -6,7 +6,7 @@ import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioUpdateDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.EmailJaCadastradoException;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.LoginJaCadastradoException;
-import br.com.fiap.horadoprato.horadoprato.dto.exception.SenhaJaCadastradaException;
+import br.com.fiap.horadoprato.horadoprato.dto.exception.CadastrodeSenhaException;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.UsuarioNaoEncontradoException;
 import br.com.fiap.horadoprato.horadoprato.infra.security.CriptografiaUtil;
 import br.com.fiap.horadoprato.horadoprato.model.Usuario;
@@ -35,9 +35,9 @@ public class UsuarioService {
         }
 
         Usuario usuario = Usuario.builder()
+                .login(dto.login())
                 .nome(dto.nome())
                 .email(dto.email())
-                .login(dto.login())
                 .senha(CriptografiaUtil.encriptar(dto.senha())) // TODO: precisamos considerar ocultar esse dado
                 .tipoUsuario(dto.tipoUsuario())
                 .endereco(dto.endereco())
@@ -47,15 +47,17 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void alterarSenha(Long id, SenhaUpdateDTO dto) {
-        Usuario usuario = buscarEntityPorId(id);
+    public void alterarSenha(String  login, SenhaUpdateDTO dto) {
+        Usuario usuario = buscarEntityPorlogin(login);
 
-        if (CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.senhaAtual())) {
-            throw new SenhaJaCadastradaException("A senha digitada é igual a senha anterior!");
+        if (!CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.senhaAtual())) {
+            throw new CadastrodeSenhaException("A senha atual informada está incorreta!");
+        } else if (CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.novaSenha())) {
+            throw new CadastrodeSenhaException("A nova senha informada é igual a senha anterior!");
+        } else {
+            usuario.setSenha(CriptografiaUtil.encriptar(dto.novaSenha()));
+            repository.save(usuario);
         }
-
-        usuario.setSenha(CriptografiaUtil.encriptar(dto.novaSenha()));
-        repository.save(usuario);
     }
 
     @Transactional(readOnly = true)
@@ -74,9 +76,9 @@ public class UsuarioService {
     }*/
 
     @Transactional
-    public void atualizar(long id, UsuarioUpdateDTO dto) {
+    public void atualizar(UsuarioUpdateDTO dto) {
 
-        Usuario usuario = buscarEntityPorId(id);
+        Usuario usuario = buscarEntityPorlogin(dto.login());
 
         usuario.setNome(dto.nome());
         usuario.setLogin(dto.login());
@@ -87,13 +89,13 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void deletar(Long id) {
-        Usuario usuario = buscarEntityPorId(id);
+    public void deletar(String login) {
+        Usuario usuario = buscarEntityPorlogin(login);
         repository.delete(usuario);
     }
 
-    private Usuario buscarEntityPorId(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário com o id " + id + "não encontrado!"));
+    private Usuario buscarEntityPorlogin(String login) {
+        return repository.findByLogin(login)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário  " + login + " não encontrado!"));
     }
 }

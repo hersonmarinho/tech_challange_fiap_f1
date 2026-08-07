@@ -20,7 +20,7 @@ public class AuthController {
         this.service = service;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/v1/login")
     public ResponseEntity<String> login(@RequestBody @Valid LoginDTO loginDTO) {
         boolean valido = service.validarLogin(loginDTO);
         if (valido) {

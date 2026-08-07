@@ -6,7 +6,6 @@ import java.util.Base64;
 
 public class CriptografiaUtil {
 
-    // A chave precisa ter exatamente 16 caracteres
     private static final String CHAVE_16_LETRAS = "MinhaChaveDe16Ch";
     private static final SecretKeySpec CHAVE = new SecretKeySpec(CHAVE_16_LETRAS.getBytes(), "AES");
 
@@ -23,7 +22,6 @@ public class CriptografiaUtil {
         }
     }
 
-    // DECRIPTAR
     public static String decriptar(String textoCriptografado) {
         if (textoCriptografado == null) return null;
         try {

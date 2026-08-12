@@ -1,18 +1,13 @@
 package br.com.fiap.horadoprato.horadoprato.controller;
 
+import br.com.fiap.horadoprato.horadoprato.api.AuthApi; // Interface gerada pelo plugin OpenAPI
 import br.com.fiap.horadoprato.horadoprato.dto.LoginDTO;
 import br.com.fiap.horadoprato.horadoprato.services.AuthService;
-import br.com.fiap.horadoprato.horadoprato.services.UsuarioService;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
-public class AuthController {
+public class AuthController implements AuthApi {
 
     private final AuthService service;
 
@@ -20,8 +15,8 @@ public class AuthController {
         this.service = service;
     }
 
-    @PostMapping("/v1/login")
-    public ResponseEntity<String> login(@RequestBody @Valid LoginDTO loginDTO) {
+    @Override
+    public ResponseEntity<String> login(LoginDTO loginDTO) {
         boolean valido = service.validarLogin(loginDTO);
         if (valido) {
             return ResponseEntity.ok("Login efetuado com sucesso.");

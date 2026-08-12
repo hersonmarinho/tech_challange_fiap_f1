@@ -1,0 +1,350 @@
+openapi: 3.0.3
+info:
+  title: API Hora do Prato - Serviços de Usuários e Autenticação
+  description: Contrato unificado focado em contract-first que mapeia as operações de negócio das classes AuthService e UsuarioService.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor Local
+
+paths:
+  # Operações mapeadas do AuthService
+  /api/auth/v1/login:
+    post:
+      summary: Efetuar login e validar credenciais
+      operationId: login
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDTO'
+      responses:
+        '200':
+          description: Login efetuado com sucesso.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                sucesso:
+                  summary: Exemplo de sucesso
+                  value: "Login efetuado com sucesso."
+        '401':
+          description: Credenciais inválidas (Login ou senha incorretos).
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                falha:
+                  summary: Exemplo de credenciais inválidas
+                  value: "Login ou senha inválidos."
+
+  # Operações mapeadas do UsuarioService
+  /api/usuarios/v1/cadastrar:
+    post:
+      summary: Cadastrar um novo usuário
+      operationId: cadastrar
+      tags:
+        - Usuarios
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioRequestDTO'
+      responses:
+        '201':
+          description: Usuário cadastrado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponseDTO'
+              examples:
+                sucessoCadastro:
+                  summary: Usuário criado com sucesso
+                  value:
+                    nome: "Carlos Alberto"
+                    login: "carlos_alberto"
+                    email: "carlos@horadoprato.com"
+        '400':
+          description: Erro de validação de dados ou duplicidade de registros (Exceções de negócio).
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                loginDuplicado:
+                  summary: Login já cadastrado (LoginJaCadastradoException)
+                  value: "Este login já esta cadastrado no sistema!"
+                emailDuplicado:
+                  summary: E-mail já cadastrado (EmailJaCadastradoException)
+                  value: "Este e-mail já esta cadastrado no sistema!"
+
+  /api/usuarios/v1/{login}/senha:
+    patch:
+      summary: Alterar a senha do usuário
+      operationId: alterarSenha
+      tags:
+        - Usuarios
+      parameters:
+        - name: login
+          in: path
+          required: true
+          description: Identificador de login do usuário.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SenhaUpdateDTO'
+      responses:
+        '204':
+          description: Senha alterada com sucesso.
+        '400':
+          description: Regra de negócio violada para atualização de senha (CadastrodeSenhaException).
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                senhaAtualIncorreta:
+                  summary: Senha atual incorreta
+                  value: "A senha atual informada está incorreta!"
+                senhaIgualAnterior:
+                  summary: Nova senha idêntica à antiga
+                  value: "A nova senha informada é igual a senha anterior!"
+        '404':
+          description: Usuário não encontrado (UsuarioNaoEncontradoException).
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                naoEncontrado:
+                  summary: Usuário inexistente
+                  value: "Usuário admin_sistema não encontrado!"
+
+  /api/usuarios/v1/buscar:
+    get:
+      summary: Buscar usuários por nome
+      operationId: buscarPorNome
+      tags:
+        - Usuarios
+      parameters:
+        - name: nome
+          in: query
+          required: true
+          description: Filtro de busca parcial para o nome do usuário.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de usuários encontrados retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioResponseDTO'
+              examples:
+                sucessoLista:
+                  summary: Lista com resultados encontrados
+                  value:
+                    - nome: "Carlos Alberto"
+                      login: "carlos_alberto"
+                      email: "carlos@horadoprato.com"
+                    - nome: "Carlos Eduardo"
+                      login: "cadu_silva"
+                      email: "cadu@horadoprato.com"
+
+  /api/usuarios/v1/{login}/atualizar:
+    patch:
+      summary: Atualizar dados cadastrais do usuário
+      operationId: atualizar
+      tags:
+        - Usuarios
+      parameters:
+        - name: login
+          in: path
+          required: true
+          description: Identificador de login do usuário que sofrerá atualização.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioUpdateDTO'
+      responses:
+        '204':
+          description: Dados cadastrais updated com sucesso.
+        '404':
+          description: Usuário não encontrado.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                naoEncontrado:
+                  summary: Usuário inexistente
+                  value: "Usuário carlos_alberto não encontrado!"
+
+  /api/usuarios/v1/{login}:
+    delete:
+      summary: Remover usuário
+      operationId: deletar
+      tags:
+        - Usuarios
+      parameters:
+        - name: login
+          in: path
+          required: true
+          description: Identificador de login do usuário a ser deletado.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Usuário deletado com sucesso.
+        '404':
+          description: Usuário não encontrado.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                naoEncontrado:
+                  summary: Usuário inexistente
+                  value: "Usuário carlos_alberto não encontrado!"
+
+components:
+  schemas:
+    LoginDTO:
+      type: object
+      required:
+        - login
+        - senha
+      properties:
+        login:
+          type: string
+          example: "chefe_master"
+        senha:
+          type: string
+          format: password
+          example: "SenhaSegura123"
+
+    UsuarioRequestDTO:
+      type: object
+      required:
+        - nome
+        - login
+        - senha
+        - email
+        - tipoUsuario
+        - endereco
+      properties:
+        nome:
+          type: string
+          example: "Carlos Alberto"
+        login:
+          type: string
+          example: "carlos_alberto"
+        senha:
+          type: string
+          format: password
+          example: "MinhaSenha@2026"
+        email:
+          type: string
+          format: email
+          example: "carlos@horadoprato.com"
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuarioEnum'
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+
+    UsuarioResponseDTO:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: "Carlos Alberto"
+        login:
+          type: string
+          example: "carlos_alberto"
+        email:
+          type: string
+          format: email
+          example: "carlos@horadoprato.com"
+
+    SenhaUpdateDTO:
+      type: object
+      required:
+        - senhaAntiga
+        - novaSenha
+      properties:
+        senhaAntiga:
+          type: string
+          format: password
+          example: "MinhaSenha@2026"
+        novaSenha:
+          type: string
+          format: password
+          example: "NovaSenhaAlterada#1"
+
+    # Atualizado com os novos parâmetros opcionais (@Nullable)
+    UsuarioUpdateDTO:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: "Carlos Alberto Silva"
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuarioEnum'
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+
+    TipoUsuarioEnum:
+      type: string
+      enum:
+        - CLIENTE
+        - ADMINISTRADOR
+        - OPERADOR
+
+    EnderecoDTO:
+      type: object
+      required:
+        - logradouro
+        - numero
+        - cep
+        - bairro
+        - cidade
+        - estado
+      properties:
+        logradouro:
+          type: string
+          example: "Avenida Paulista"
+        numero:
+          type: string
+          example: "1100"
+        complemento:
+          type: string
+          example: "Apto 42"
+        bairro:
+          type: string
+          example: "Bela Vista"
+        cidade:
+          type: string
+          example: "São Paulo"
+        estado:
+          type: string
+          example: "SP"
+        cep:
+          type: string
+          example: "01310-100"

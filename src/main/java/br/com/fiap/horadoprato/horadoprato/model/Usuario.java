@@ -14,11 +14,10 @@ import java.time.temporal.ChronoUnit;
 @Builder
 public class Usuario {
 
-    /*@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;*/
-
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
     @Column(nullable = false, unique = true)
     private String login;
 

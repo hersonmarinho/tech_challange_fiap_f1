@@ -9,6 +9,8 @@ import br.com.fiap.horadoprato.horadoprato.dto.exception.LoginJaCadastradoExcept
 import br.com.fiap.horadoprato.horadoprato.dto.exception.CadastrodeSenhaException;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.UsuarioNaoEncontradoException;
 import br.com.fiap.horadoprato.horadoprato.infra.security.CriptografiaUtil;
+import br.com.fiap.horadoprato.horadoprato.model.Endereco;
+import br.com.fiap.horadoprato.horadoprato.model.TipoUsuario;
 import br.com.fiap.horadoprato.horadoprato.model.Usuario;
 import br.com.fiap.horadoprato.horadoprato.repositories.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -27,35 +29,50 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
-        if (repository.existsByLogin(dto.login())) {
+        if (repository.existsByLogin(dto.getLogin())) {
             throw new LoginJaCadastradoException("Este login já esta cadastrado no sistema!");
         }
-        if (repository.existsByEmail(dto.email())) {
+
+        if (repository.existsByEmail(dto.getEmail())) {
             throw new EmailJaCadastradoException("Este e-mail já esta cadastrado no sistema!");
         }
 
         Usuario usuario = Usuario.builder()
-                .login(dto.login())
-                .nome(dto.nome())
-                .email(dto.email())
-                .senha(CriptografiaUtil.encriptar(dto.senha())) // TODO: precisamos considerar ocultar esse dado
-                .tipoUsuario(dto.tipoUsuario())
-                .endereco(dto.endereco())
+                .login(dto.getLogin())
+                .nome(dto.getNome())
+                .email(dto.getEmail())
+                .senha(CriptografiaUtil.encriptar(dto.getSenha()))
+                .tipoUsuario(TipoUsuario.valueOf(dto.getTipoUsuario().name()))
+                .endereco(new Endereco(
+                        dto.getEndereco().getLogradouro(),
+                        dto.getEndereco().getNumero(),
+                        dto.getEndereco().getComplemento(),
+                        dto.getEndereco().getCidade(),
+                        dto.getEndereco().getEstado(),
+                        dto.getEndereco().getCep()
+                ))
                 .build();
 
-        return UsuarioResponseDTO.fromEntity(repository.save(usuario));
+        Usuario usuarioSalvo = repository.save(usuario);
+
+        UsuarioResponseDTO response = new UsuarioResponseDTO();
+        response.setLogin(usuarioSalvo.getLogin());
+        response.setNome(usuarioSalvo.getNome());
+        response.setEmail(usuarioSalvo.getEmail());
+
+        return response;
     }
 
     @Transactional
-    public void alterarSenha(String  login, SenhaUpdateDTO dto) {
+    public void alterarSenha(String login, SenhaUpdateDTO dto) {
         Usuario usuario = buscarEntityPorlogin(login);
 
-        if (!CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.senhaAtual())) {
+        if (!CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.getSenhaAntiga())) {
             throw new CadastrodeSenhaException("A senha atual informada está incorreta!");
-        } else if (CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.novaSenha())) {
+        } else if (CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.getNovaSenha())) {
             throw new CadastrodeSenhaException("A nova senha informada é igual a senha anterior!");
         } else {
-            usuario.setSenha(CriptografiaUtil.encriptar(dto.novaSenha()));
+            usuario.setSenha(CriptografiaUtil.encriptar(dto.getNovaSenha()));
             repository.save(usuario);
         }
     }
@@ -64,26 +81,30 @@ public class UsuarioService {
     public List<UsuarioResponseDTO> buscarPorNome(String nome) {
         return repository.findByNomeContainingIgnoreCase(nome)
                 .stream()
-                .map(UsuarioResponseDTO::fromEntity)
+                .map(usuarioSalvo -> {
+                    UsuarioResponseDTO response = new UsuarioResponseDTO();
+                    //response.setId(usuarioSalvo.getId());
+                    response.setNome(usuarioSalvo.getNome());
+                    response.setLogin(usuarioSalvo.getLogin());
+                    response.setEmail(usuarioSalvo.getEmail());
+                    return response;
+                })
                 .toList();
     }
 
-    /*@Transactional(readOnly = true)
-    public boolean validarLogin(LoginDTO dto) {
-        return repository.findByLogin(dto.login())
-                .map(u -> u.getSenha().equals(CriptografiaUtil.encriptar(dto.senha())))
-                .orElse(false);
-    }*/
-
     @Transactional
-    public void atualizar(UsuarioUpdateDTO dto) {
+    public void atualizar(String login, UsuarioUpdateDTO dto) {
+        Usuario usuario = buscarEntityPorlogin(login);
 
-        Usuario usuario = buscarEntityPorlogin(dto.login());
-
-        usuario.setNome(dto.nome());
-        usuario.setLogin(dto.login());
-        usuario.setTipoUsuario(dto.tipoUsuario());
-        usuario.setEndereco(dto.endereco());
+        usuario.setNome(dto.getNome());
+        usuario.setTipoUsuario(TipoUsuario.valueOf(dto.getTipoUsuario().name()));
+        usuario.setEndereco(new Endereco(
+                dto.getEndereco().getLogradouro(),
+                dto.getEndereco().getNumero(),
+                dto.getEndereco().getComplemento(),
+                dto.getEndereco().getCidade(),
+                dto.getEndereco().getEstado(),
+                dto.getEndereco().getCep()));
 
         repository.save(usuario);
     }

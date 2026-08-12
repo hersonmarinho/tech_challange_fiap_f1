@@ -18,8 +18,8 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public boolean validarLogin(LoginDTO dto) {
-        return repository.findByLogin(dto.login())
-                .map(u -> u.getSenha().equals(CriptografiaUtil.encriptar(dto.senha())))
+        return repository.findByLogin(dto.getLogin())
+                .map(u -> u.getSenha().equals(CriptografiaUtil.encriptar(dto.getSenha())))
                 .orElse(false);
     }
 

@@ -10,7 +10,7 @@ servers:
 
 paths:
   # Operações mapeadas do AuthService
-  /api/auth/v1/login:
+  /api/v1/auth/login:
     post:
       summary: Efetuar login e validar credenciais
       operationId: login
@@ -45,7 +45,7 @@ paths:
                   value: "Login ou senha inválidos."
 
   # Operações mapeadas do UsuarioService
-  /api/usuarios/v1/cadastrar:
+  /api/v1/usuarios/cadastrar:
     post:
       summary: Cadastrar um novo usuário
       operationId: cadastrar
@@ -85,17 +85,17 @@ paths:
                   summary: E-mail já cadastrado (EmailJaCadastradoException)
                   value: "Este e-mail já esta cadastrado no sistema!"
 
-  /api/usuarios/v1/{login}/senha:
+  /api/v1/usuarios/{id}/senha:
     patch:
       summary: Alterar a senha do usuário
       operationId: alterarSenha
       tags:
         - Usuarios
       parameters:
-        - name: login
+        - name: id
           in: path
           required: true
-          description: Identificador de login do usuário.
+          description: Identificador único (UUID) do usuário.
           schema:
             type: string
       requestBody:
@@ -129,9 +129,9 @@ paths:
               examples:
                 naoEncontrado:
                   summary: Usuário inexistente
-                  value: "Usuário admin_sistema não encontrado!"
+                  value: "Usuário com id 123e4567-e89b-12d3-a456-426614174000 não encontrado!"
 
-  /api/usuarios/v1/buscar:
+  /api/v1/usuarios/buscar:
     get:
       summary: Buscar usuários por nome
       operationId: buscarPorNome
@@ -164,17 +164,17 @@ paths:
                       login: "cadu_silva"
                       email: "cadu@horadoprato.com"
 
-  /api/usuarios/v1/{login}/atualizar:
+  /api/v1/usuarios/{id}/atualizar:
     patch:
       summary: Atualizar dados cadastrais do usuário
       operationId: atualizar
       tags:
         - Usuarios
       parameters:
-        - name: login
+        - name: id
           in: path
           required: true
-          description: Identificador de login do usuário que sofrerá atualização.
+          description: Identificador único (UUID) do usuário que sofrerá atualização.
           schema:
             type: string
       requestBody:
@@ -197,17 +197,17 @@ paths:
                   summary: Usuário inexistente
                   value: "Usuário carlos_alberto não encontrado!"
 
-  /api/usuarios/v1/{login}:
+  /api/v1/usuarios/{id}:
     delete:
       summary: Remover usuário
       operationId: deletar
       tags:
         - Usuarios
       parameters:
-        - name: login
+        - name: id
           in: path
           required: true
-          description: Identificador de login do usuário a ser deletado.
+          description: Identificador único (UUID) do usuário a ser deletado.
           schema:
             type: string
       responses:
@@ -282,6 +282,9 @@ components:
           type: string
           format: email
           example: "carlos@horadoprato.com"
+        id:
+          type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
 
     SenhaUpdateDTO:
       type: object
@@ -313,9 +316,8 @@ components:
     TipoUsuarioEnum:
       type: string
       enum:
+        - DONO_RESTAURANTE
         - CLIENTE
-        - ADMINISTRADOR
-        - OPERADOR
 
     EnderecoDTO:
       type: object

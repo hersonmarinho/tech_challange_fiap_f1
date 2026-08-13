@@ -59,13 +59,14 @@ public class UsuarioService {
         response.setLogin(usuarioSalvo.getLogin());
         response.setNome(usuarioSalvo.getNome());
         response.setEmail(usuarioSalvo.getEmail());
+        response.setId(usuarioSalvo.getId());
 
         return response;
     }
 
     @Transactional
-    public void alterarSenha(String login, SenhaUpdateDTO dto) {
-        Usuario usuario = buscarEntityPorlogin(login);
+    public void alterarSenhaPorId(String id, SenhaUpdateDTO dto) {
+        Usuario usuario = buscarEntityPorId(id);
 
         if (!CriptografiaUtil.decriptar(usuario.getSenha()).equals(dto.getSenhaAntiga())) {
             throw new CadastrodeSenhaException("A senha atual informada está incorreta!");
@@ -83,7 +84,7 @@ public class UsuarioService {
                 .stream()
                 .map(usuarioSalvo -> {
                     UsuarioResponseDTO response = new UsuarioResponseDTO();
-                    //response.setId(usuarioSalvo.getId());
+                    response.setId(usuarioSalvo.getId());
                     response.setNome(usuarioSalvo.getNome());
                     response.setLogin(usuarioSalvo.getLogin());
                     response.setEmail(usuarioSalvo.getEmail());
@@ -93,8 +94,8 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void atualizar(String login, UsuarioUpdateDTO dto) {
-        Usuario usuario = buscarEntityPorlogin(login);
+    public void atualizarPorId(String id, UsuarioUpdateDTO dto) {
+        Usuario usuario = buscarEntityPorId(id);
 
         usuario.setNome(dto.getNome());
         usuario.setTipoUsuario(TipoUsuario.valueOf(dto.getTipoUsuario().name()));
@@ -110,13 +111,13 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void deletar(String login) {
-        Usuario usuario = buscarEntityPorlogin(login);
+    public void deletarPorId(String id) {
+        Usuario usuario = buscarEntityPorId(id);
         repository.delete(usuario);
     }
 
-    private Usuario buscarEntityPorlogin(String login) {
-        return repository.findByLogin(login)
-                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário  " + login + " não encontrado!"));
+    private Usuario buscarEntityPorId(String id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado!"));
     }
 }

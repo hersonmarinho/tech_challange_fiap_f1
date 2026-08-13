@@ -28,8 +28,8 @@ public class UsuarioController implements UsuariosApi {
     }
 
     @Override
-    public ResponseEntity<Void> alterarSenha(String login, SenhaUpdateDTO senhaUpdateDTO) {
-        service.alterarSenha(login, senhaUpdateDTO);
+    public ResponseEntity<Void> alterarSenha(String id, SenhaUpdateDTO senhaUpdateDTO) {
+        service.alterarSenhaPorId(id, senhaUpdateDTO);
         return ResponseEntity.noContent().build();
     }
 
@@ -39,14 +39,14 @@ public class UsuarioController implements UsuariosApi {
     }
 
     @Override
-    public ResponseEntity<Void> atualizar(String login, UsuarioUpdateDTO usuarioUpdateDTO) {
-        service.atualizar(login, usuarioUpdateDTO);
+    public ResponseEntity<Void> atualizar(String id, UsuarioUpdateDTO usuarioUpdateDTO) {
+        service.atualizarPorId(id, usuarioUpdateDTO);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<Void> deletar(String login) {
-        service.deletar(login);
+    public ResponseEntity<Void> deletar(String id) {
+        service.deletarPorId(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -30,4 +30,13 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleExceptionGenerica(Exception ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        problemDetail.setTitle("Erro nao esperado!");
+        problemDetail.setProperty("timestamp", java.time.LocalDateTime.now());
+
+        return problemDetail;
+    }
+
 }

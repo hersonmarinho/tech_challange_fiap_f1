@@ -1,6 +1,7 @@
 package br.com.fiap.horadoprato.horadoprato.controller.exception;
 
 import br.com.fiap.horadoprato.horadoprato.dto.exception.CadastrodeSenhaException;
+import br.com.fiap.horadoprato.horadoprato.dto.exception.CredenciaisInvalidasException;
 import br.com.fiap.horadoprato.horadoprato.dto.exception.UsuarioNaoEncontradoException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,16 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.CONFLICT.value(), detail.getStatus());
         assertEquals("Conflito de cadastro", detail.getTitle());
         assertEquals("mensagem", detail.getDetail());
+        assertNotNull(detail.getProperties().get("timestamp"));
+    }
+
+    @Test
+    void deveRetornarUnauthorizedParaCredenciaisInvalidas() {
+        ProblemDetail detail = handler.handleCredenciaisInvalidas(new CredenciaisInvalidasException("Login ou senha inválidos."));
+
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), detail.getStatus());
+        assertEquals("Credenciais inválidas", detail.getTitle());
+        assertEquals("Login ou senha inválidos.", detail.getDetail());
         assertNotNull(detail.getProperties().get("timestamp"));
     }
 

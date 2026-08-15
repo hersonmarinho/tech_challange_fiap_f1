@@ -1,6 +1,7 @@
 package br.com.fiap.horadoprato.horadoprato.controller;
 
 import br.com.fiap.horadoprato.horadoprato.dto.LoginDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.exception.CredenciaisInvalidasException;
 import br.com.fiap.horadoprato.horadoprato.services.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,13 +36,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void deveRetornar401QuandoLoginInvalido() {
+    void deveLancarExcecaoQuandoLoginInvalido() {
         LoginDTO dto = new LoginDTO("user.login", "senha");
         when(service.validarLogin(dto)).thenReturn(false);
 
-        ResponseEntity<String> response = controller.login(dto);
+        CredenciaisInvalidasException exception = assertThrows(CredenciaisInvalidasException.class,
+                () -> controller.login(dto));
 
-        assertEquals(HttpStatusCode.valueOf(401), response.getStatusCode());
-        assertEquals("Login ou senha inválidos.", response.getBody());
+        assertEquals("Login ou senha inválidos.", exception.getMessage());
     }
 }

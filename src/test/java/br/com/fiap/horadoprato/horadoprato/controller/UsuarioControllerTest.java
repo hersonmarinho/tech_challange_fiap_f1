@@ -1,9 +1,6 @@
 package br.com.fiap.horadoprato.horadoprato.controller;
 
-import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
-import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
-import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
-import br.com.fiap.horadoprato.horadoprato.dto.UsuarioUpdateDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.*;
 import br.com.fiap.horadoprato.horadoprato.services.UsuarioService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,10 +28,10 @@ class UsuarioControllerTest {
     @Test
     void deveCadastrarComStatus201() {
         UsuarioRequestDTO request = new UsuarioRequestDTO();
-        UsuarioResponseDTO responseDTO = new UsuarioResponseDTO().id("id-1").nome("Carlos");
+        UsuarioCadastroResponseDTO responseDTO = new UsuarioCadastroResponseDTO().id("id-1").nome("Carlos");
         when(service.cadastrar(request)).thenReturn(responseDTO);
 
-        ResponseEntity<UsuarioResponseDTO> response = controller.cadastrar(request);
+        ResponseEntity<UsuarioCadastroResponseDTO> response = controller.cadastrar(request);
 
         assertEquals(HttpStatusCode.valueOf(201), response.getStatusCode());
         assertEquals("id-1", response.getBody().getId());

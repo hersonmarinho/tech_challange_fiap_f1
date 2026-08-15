@@ -43,7 +43,6 @@ paths:
                 falha:
                   summary: Exemplo de credenciais inválidas
                   value: "Login ou senha inválidos."
-
   # Operações mapeadas do UsuarioService
   /api/v1/usuarios/cadastrar:
     post:
@@ -63,14 +62,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsuarioResponseDTO'
+                $ref: '#/components/schemas/UsuarioCadastroResponseDTO'
               examples:
                 sucessoCadastro:
                   summary: Usuário criado com sucesso
                   value:
+                    id: "123e4567-e89b-12d3-a456-426614174000"
                     nome: "Carlos Alberto"
-                    login: "carlos_alberto"
                     email: "carlos@horadoprato.com"
+                    tipoUsuario: "CLIENTE"
         '400':
           description: Erro de validação de dados ou duplicidade de registros (Exceções de negócio).
           content:
@@ -84,7 +84,6 @@ paths:
                 emailDuplicado:
                   summary: E-mail já cadastrado (EmailJaCadastradoException)
                   value: "Este e-mail já esta cadastrado no sistema!"
-
   /api/v1/usuarios/{id}/senha:
     patch:
       summary: Alterar a senha do usuário
@@ -130,7 +129,6 @@ paths:
                 naoEncontrado:
                   summary: Usuário inexistente
                   value: "Usuário com id 123e4567-e89b-12d3-a456-426614174000 não encontrado!"
-
   /api/v1/usuarios/buscar:
     get:
       summary: Buscar usuários por nome
@@ -160,10 +158,29 @@ paths:
                     - nome: "Carlos Alberto"
                       login: "carlos_alberto"
                       email: "carlos@horadoprato.com"
+                      id: "123e4567-e89b-12d3-a456-426614174000"
+                      tipoUsuario: "CLIENTE"
+                      endereco:
+                        logradouro: "Avenida Paulista"
+                        numero: "1100"
+                        complemento: "Apto 42"
+                        bairro: "Bela Vista"
+                        cidade: "São Paulo"
+                        estado: "SP"
+                        cep: "01310-100"
                     - nome: "Carlos Eduardo"
                       login: "cadu_silva"
                       email: "cadu@horadoprato.com"
-
+                      id: "223e4567-e89b-12d3-a456-426614174001"
+                      tipoUsuario: "DONO_RESTAURANTE"
+                      endereco:
+                        logradouro: "Rua Augusta"
+                        numero: "2500"
+                        complemento: "Sala 401"
+                        bairro: "Centro"
+                        cidade: "São Paulo"
+                        estado: "SP"
+                        cep: "01305-100"
   /api/v1/usuarios/{id}/atualizar:
     patch:
       summary: Atualizar dados cadastrais do usuário
@@ -223,7 +240,6 @@ paths:
                 naoEncontrado:
                   summary: Usuário inexistente
                   value: "Usuário carlos_alberto não encontrado!"
-
 components:
   schemas:
     LoginDTO:
@@ -268,7 +284,6 @@ components:
           $ref: '#/components/schemas/TipoUsuarioEnum'
         endereco:
           $ref: '#/components/schemas/EnderecoDTO'
-
     UsuarioResponseDTO:
       type: object
       properties:
@@ -285,6 +300,25 @@ components:
         id:
           type: string
           example: "123e4567-e89b-12d3-a456-426614174000"
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuarioEnum'
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+    UsuarioCadastroResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        nome:
+          type: string
+          example: "Carlos Alberto"
+        email:
+          type: string
+          format: email
+          example: "carlos@horadoprato.com"
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuarioEnum'
 
     SenhaUpdateDTO:
       type: object
@@ -300,8 +334,6 @@ components:
           type: string
           format: password
           example: "NovaSenhaAlterada#1"
-
-    # Atualizado com os novos parâmetros opcionais (@Nullable)
     UsuarioUpdateDTO:
       type: object
       properties:

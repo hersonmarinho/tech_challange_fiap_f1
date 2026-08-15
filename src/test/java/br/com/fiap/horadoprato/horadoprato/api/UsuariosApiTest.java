@@ -1,9 +1,6 @@
 package br.com.fiap.horadoprato.horadoprato.api;
 
-import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
-import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
-import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
-import br.com.fiap.horadoprato.horadoprato.dto.UsuarioUpdateDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +63,7 @@ class UsuariosApiTest {
             }
         };
 
-        ResponseEntity<UsuarioResponseDTO> result = api.cadastrar(new UsuarioRequestDTO());
+        ResponseEntity<UsuarioCadastroResponseDTO> result = api.cadastrar(new UsuarioRequestDTO());
 
         assertEquals(HttpStatus.NOT_IMPLEMENTED, result.getStatusCode());
         assertEquals("application/json;charset=UTF-8", response.getHeader("Content-Type"));

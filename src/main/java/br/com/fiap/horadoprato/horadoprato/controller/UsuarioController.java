@@ -3,6 +3,7 @@ package br.com.fiap.horadoprato.horadoprato.controller;
 
 import br.com.fiap.horadoprato.horadoprato.api.UsuariosApi;
 import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.UsuarioCadastroResponseDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioUpdateDTO;
@@ -23,7 +24,7 @@ public class UsuarioController implements UsuariosApi {
     }
 
     @Override
-    public ResponseEntity<UsuarioResponseDTO> cadastrar(UsuarioRequestDTO usuarioRequestDTO) {
+    public ResponseEntity<UsuarioCadastroResponseDTO> cadastrar(UsuarioRequestDTO usuarioRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.cadastrar(usuarioRequestDTO));
     }
 

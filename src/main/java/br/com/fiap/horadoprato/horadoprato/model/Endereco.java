@@ -18,6 +18,9 @@ public class Endereco {
 
     private String complemento;
 
+    @NotBlank(message = "O bairro é obrigatório")
+    private String bairro;
+
     @NotBlank(message = "A cidade é obrigatória")
     private String cidade;
 

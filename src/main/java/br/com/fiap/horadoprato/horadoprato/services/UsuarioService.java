@@ -1,6 +1,9 @@
 package br.com.fiap.horadoprato.horadoprato.services;
 
+import br.com.fiap.horadoprato.horadoprato.dto.EnderecoDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.SenhaUpdateDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.TipoUsuarioEnum;
+import br.com.fiap.horadoprato.horadoprato.dto.UsuarioCadastroResponseDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioRequestDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioResponseDTO;
 import br.com.fiap.horadoprato.horadoprato.dto.UsuarioUpdateDTO;
@@ -28,7 +31,7 @@ public class UsuarioService {
     }
 
     @Transactional
-    public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
+    public UsuarioCadastroResponseDTO cadastrar(UsuarioRequestDTO dto) {
         if (repository.existsByLogin(dto.getLogin())) {
             throw new LoginJaCadastradoException("Este login já esta cadastrado no sistema!");
         }
@@ -47,6 +50,7 @@ public class UsuarioService {
                         dto.getEndereco().getLogradouro(),
                         dto.getEndereco().getNumero(),
                         dto.getEndereco().getComplemento(),
+                        dto.getEndereco().getBairro(),
                         dto.getEndereco().getCidade(),
                         dto.getEndereco().getEstado(),
                         dto.getEndereco().getCep()
@@ -55,11 +59,11 @@ public class UsuarioService {
 
         Usuario usuarioSalvo = repository.save(usuario);
 
-        UsuarioResponseDTO response = new UsuarioResponseDTO();
-        response.setLogin(usuarioSalvo.getLogin());
+        UsuarioCadastroResponseDTO response = new UsuarioCadastroResponseDTO();
+        response.setId(usuarioSalvo.getId());
         response.setNome(usuarioSalvo.getNome());
         response.setEmail(usuarioSalvo.getEmail());
-        response.setId(usuarioSalvo.getId());
+        response.setTipoUsuario(TipoUsuarioEnum.fromValue(usuarioSalvo.getTipoUsuario().name()));
 
         return response;
     }
@@ -88,6 +92,22 @@ public class UsuarioService {
                     response.setNome(usuarioSalvo.getNome());
                     response.setLogin(usuarioSalvo.getLogin());
                     response.setEmail(usuarioSalvo.getEmail());
+                    
+                    if (usuarioSalvo.getTipoUsuario() != null) {
+                        response.setTipoUsuario(TipoUsuarioEnum.fromValue(usuarioSalvo.getTipoUsuario().name()));
+                    }
+                    
+                    if (usuarioSalvo.getEndereco() != null) {
+                        EnderecoDTO enderecoDTO = new EnderecoDTO()
+                                .logradouro(usuarioSalvo.getEndereco().getLogradouro())
+                                .numero(usuarioSalvo.getEndereco().getNumero())
+                                .complemento(usuarioSalvo.getEndereco().getComplemento())
+                                .bairro(usuarioSalvo.getEndereco().getBairro())
+                                .cidade(usuarioSalvo.getEndereco().getCidade())
+                                .estado(usuarioSalvo.getEndereco().getEstado())
+                                .cep(usuarioSalvo.getEndereco().getCep());
+                        response.setEndereco(enderecoDTO);
+                    }
                     return response;
                 })
                 .toList();
@@ -97,15 +117,24 @@ public class UsuarioService {
     public void atualizarPorId(String id, UsuarioUpdateDTO dto) {
         Usuario usuario = buscarEntityPorId(id);
 
-        usuario.setNome(dto.getNome());
-        usuario.setTipoUsuario(TipoUsuario.valueOf(dto.getTipoUsuario().name()));
-        usuario.setEndereco(new Endereco(
-                dto.getEndereco().getLogradouro(),
-                dto.getEndereco().getNumero(),
-                dto.getEndereco().getComplemento(),
-                dto.getEndereco().getCidade(),
-                dto.getEndereco().getEstado(),
-                dto.getEndereco().getCep()));
+        if (dto.getNome() != null) {
+            usuario.setNome(dto.getNome());
+        }
+
+        if (dto.getTipoUsuario() != null) {
+            usuario.setTipoUsuario(TipoUsuario.valueOf(dto.getTipoUsuario().name()));
+        }
+
+        if (dto.getEndereco() != null) {
+            usuario.setEndereco(new Endereco(
+                    dto.getEndereco().getLogradouro(),
+                    dto.getEndereco().getNumero(),
+                    dto.getEndereco().getComplemento(),
+                    dto.getEndereco().getBairro(),
+                    dto.getEndereco().getCidade(),
+                    dto.getEndereco().getEstado(),
+                    dto.getEndereco().getCep()));
+        }
 
         repository.save(usuario);
     }

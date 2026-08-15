@@ -75,7 +75,7 @@ class UsuarioServiceTest {
         when(repository.existsByEmail(dto.getEmail())).thenReturn(false);
         when(repository.save(org.mockito.ArgumentMatchers.any(Usuario.class))).thenReturn(salvo);
 
-        UsuarioResponseDTO response = service.cadastrar(dto);
+        var response = service.cadastrar(dto);
 
         ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
         verify(repository).save(captor.capture());
@@ -86,6 +86,8 @@ class UsuarioServiceTest {
         assertNotEquals(dto.getSenha(), enviado.getSenha());
         assertEquals(dto.getSenha(), CriptografiaUtil.decriptar(enviado.getSenha()));
         assertEquals("id-1", response.getId());
+        assertEquals(dto.getNome(), response.getNome());
+        assertEquals(dto.getEmail(), response.getEmail());
     }
 
     @Test
@@ -169,6 +171,70 @@ class UsuarioServiceTest {
         assertEquals("Nome Atualizado", salvo.getNome());
         assertEquals(TipoUsuario.DONO_RESTAURANTE, salvo.getTipoUsuario());
         assertEquals("São Paulo", salvo.getEndereco().getCidade());
+    }
+
+    @Test
+    void deveAtualizarApenasNomeQuandoOutrosCamposNulos() {
+        Usuario usuario = Usuario.builder()
+                .id("id-1")
+                .nome("Nome Original")
+                .tipoUsuario(TipoUsuario.CLIENTE)
+                .build();
+        when(repository.findById("id-1")).thenReturn(Optional.of(usuario));
+
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO()
+                .nome("Nome Atualizado");
+
+        service.atualizarPorId("id-1", dto);
+
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+        verify(repository).save(captor.capture());
+        Usuario salvo = captor.getValue();
+        assertEquals("Nome Atualizado", salvo.getNome());
+        assertEquals(TipoUsuario.CLIENTE, salvo.getTipoUsuario());
+    }
+
+    @Test
+    void deveAtualizarApenasEnderecoQuandoOutrosCamposNulos() {
+        Usuario usuario = Usuario.builder()
+                .id("id-1")
+                .nome("Nome Original")
+                .tipoUsuario(TipoUsuario.CLIENTE)
+                .build();
+        when(repository.findById("id-1")).thenReturn(Optional.of(usuario));
+
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO()
+                .endereco(criarEnderecoDTO());
+
+        service.atualizarPorId("id-1", dto);
+
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+        verify(repository).save(captor.capture());
+        Usuario salvo = captor.getValue();
+        assertEquals("Nome Original", salvo.getNome());
+        assertEquals(TipoUsuario.CLIENTE, salvo.getTipoUsuario());
+        assertEquals("São Paulo", salvo.getEndereco().getCidade());
+    }
+
+    @Test
+    void deveAtualizarApenastTipoUsuarioQuandoOutrosCamposNulos() {
+        Usuario usuario = Usuario.builder()
+                .id("id-1")
+                .nome("Nome Original")
+                .tipoUsuario(TipoUsuario.CLIENTE)
+                .build();
+        when(repository.findById("id-1")).thenReturn(Optional.of(usuario));
+
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO()
+                .tipoUsuario(TipoUsuarioEnum.DONO_RESTAURANTE);
+
+        service.atualizarPorId("id-1", dto);
+
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+        verify(repository).save(captor.capture());
+        Usuario salvo = captor.getValue();
+        assertEquals("Nome Original", salvo.getNome());
+        assertEquals(TipoUsuario.DONO_RESTAURANTE, salvo.getTipoUsuario());
     }
 
     @Test

@@ -1,401 +1,318 @@
 # Hora do Prato
 
-> Sistema de gestão de usuários para plataforma de reservas em restaurantes
+> API REST de gestão de usuários para a Fase 1 do Tech Challenge da Pós-Graduação FIAP em Arquitetura e Desenvolvimento Java.
 
-Projeto desenvolvido com **Java 21 + Spring Boot 4.0.7** para solucionar o problema de um grupo de restaurantes. Este sistema permitirá que os clientes escolham restaurantes com base na comida oferecida, em vez de se basearem na qualidade do sistema de gestão.
+Projeto desenvolvido com **Java 21 + Spring Boot 4.0.7**, com foco na gestão de usuários, autenticação, validação de credenciais, atualização de dados, troca de senha, busca por nome e exclusão de usuários.
 
-## 📋 Sumário
+## Sumário
 
 - [Características](#características)
 - [Tecnologias](#tecnologias)
 - [Requisitos](#requisitos)
-- [Instalação](#instalação)
-- [Como Executar](#como-executar)
-- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Execução com Docker Compose](#execução-com-docker-compose)
+- [Execução local](#execução-local)
 - [API Endpoints](#api-endpoints)
+- [Contrato OpenAPI / Swagger](#contrato-openapi--swagger)
 - [Coleção Postman](#coleção-postman)
-- [Configuração de Ambiente](#configuração-de-ambiente)
-- [Documentação](#documentação)
-- [Contribuição](#contribuição)
+- [Tratamento de erros](#tratamento-de-erros)
+- [Estrutura do projeto](#estrutura-do-projeto)
 
-## ✨ Características
+## Características
 
-- ✅ Cadastro e autenticação de usuários
-- ✅ Dois tipos de usuário: `CLIENTE` e `DONO_RESTAURANTE`
-- ✅ Alteração de senha segura (com criptografia)
-- ✅ Atualização de perfil de usuário
-- ✅ Busca de usuários por nome
-- ✅ Versionamento de API (`/api/v1/...`)
-- ✅ Documentação interativa com Swagger/OpenAPI 3.0
-- ✅ Banco de dados MySQL integrado
-- ✅ Docker e Docker Compose para fácil deploy
-- ✅ Validação robusta de dados
-- ✅ Tratamento de exceções personalizado
+- Cadastro de usuários;
+- Dois tipos de usuário: `CLIENTE` e `DONO_RESTAURANTE`;
+- Validação de login e senha;
+- Alteração de senha em endpoint exclusivo;
+- Atualização das demais informações em endpoint distinto;
+- Registro automático da data da última alteração;
+- Busca de usuários por nome;
+- Unicidade de login e e-mail no cadastro;
+- API versionada em `/api/v1`;
+- Documentação OpenAPI / Swagger;
+- Persistência em MySQL 8.0;
+- Docker Compose para aplicação + banco;
+- Respostas de erro padronizadas com `ProblemDetail` quando tratadas pelo `GlobalExceptionHandler`.
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 | Tecnologia | Versão | Uso |
 |---|---|---|
-| **Java** | 21 | Linguagem principal |
-| **Spring Boot** | 4.0.7 | Framework web |
-| **Spring Data JPA** | 4.0.7 | ORM e acesso a dados |
-| **Spring Validation** | 4.0.7 | Validação de dados |
-| **MySQL** | 8.0 | Banco de dados |
-| **Lombok** | - | Redução de boilerplate |
-| **OpenAPI/Swagger** | 3.0.3 | Documentação de API |
-| **Maven** | 3.9.6 | Gerenciador de dependências |
-| **Docker** | Latest | Containerização |
+| Java | 21 | Linguagem principal |
+| Spring Boot | 4.0.7 | Framework |
+| Spring Data JPA | 4.0.7 | Persistência |
+| MySQL | 8.0 | Banco relacional |
+| Springdoc OpenAPI | 2.8.0 | Swagger / documentação |
+| OpenAPI Generator | 7.4.0 | Geração de interfaces e DTOs a partir do contrato |
+| Maven | 3.9+ | Build |
+| Docker / Docker Compose | 20.10+ / 2.0+ | Containerização |
+| JUnit 5 / Spring Boot Test | — | Testes automatizados |
 
-## 📦 Requisitos
+## Requisitos
 
-### Para execução com Docker
+### Execução com Docker
+
 - Docker 20.10+
 - Docker Compose 2.0+
 
-### Para execução local
-- Java 21 JDK (Eclipse Temurin recomendado)
-- Maven 3.9.6+
-- MySQL 8.0+
+### Execução local
 
-## 🚀 Instalação
+- Java 21 JDK
+- Maven 3.9+
+- MySQL 8.0+ acessível em `localhost:3306`
 
-### 1. Clonar repositório
+## Execução com Docker Compose
 
-```bash
-git clone https://github.com/hersonmarinho/tech_challange_fiap_f1.git
-cd hora-do-prato
-```
+A forma recomendada de execução é pelo Docker Compose. O arquivo `docker-compose.yml` cria dois serviços:
 
-### 2. Configurar variáveis de ambiente (opcional para local)
+- `db`: MySQL 8.0;
+- `app`: aplicação Spring Boot.
 
-Criar arquivo `.env` ou configurar em `application.yaml`:
+O banco possui healthcheck e a aplicação aguarda o banco ficar saudável antes de iniciar.
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/meu_banco
-    username: java_user
-    password: javapassword
-```
-
-## ▶️ Como Executar
-
-### Opção 1: Docker Compose (Recomendado)
+### Subir a aplicação
 
 ```bash
-# Build e iniciar containers
-docker-compose up --build
-
-# App estará disponível em http://localhost:8080
-# MySQL estará disponível em localhost:3306
+docker compose up --build
 ```
 
-Credenciais do banco:
-- **User:** `java_user`
-- **Password:** `javapassword`
-- **Database:** `meu_banco`
+Aplicação:
 
-### Opção 2: Executar localmente
+```text
+http://localhost:8080
+```
 
-Pré-requisitos: MySQL rodando em `localhost:3306`
+Swagger UI:
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
+### Configuração do banco
+
+```text
+Database: meu_banco
+User: java_user
+Password: javapassword
+Root password: rootpassword
+```
+
+O Compose injeta as propriedades por meio de:
+
+```text
+SPRING_DATASOURCE_URL
+SPRING_DATASOURCE_USERNAME
+SPRING_DATASOURCE_PASSWORD
+```
+
+O `application.yaml` possui valores padrão para execução local.
+
+## Execução local
+
+Com MySQL disponível em `localhost:3306`:
 
 ```bash
-# Build do projeto
-./mvnw clean package
-
-# Executar aplicação
-./mvnw spring-boot:run
-
-# App estará disponível em http://localhost:8080
+mvn clean package
+mvn spring-boot:run
 ```
 
-### Opção 3: Build Docker manual
+## API Endpoints
 
-```bash
-# Build da imagem
-docker build -t horadoprato:1.0 .
+Base URL:
 
-# Executar container
-docker run -p 8080:8080 -e SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/meu_banco horadoprato:1.0
-```
-
-## 📁 Estrutura do Projeto
-
-```
-src/main/java/br/com/fiap/horadoprato/
-├── controller/
-│   └── UsuarioController.java         # Endpoints da API
-├── services/
-│   ├── UsuarioService.java            # Lógica de negócios
-│   └── AuthService.java               # Autenticação
-├── model/
-│   ├── Usuario.java                   # Entidade usuário
-│   └── Endereco.java                  # Entidade endereço
-├── repositories/
-│   └── UsuarioRepository.java         # Acesso a dados
-├── dto/
-│   ├── UsuarioRequestDTO.java
-│   ├── UsuarioResponseDTO.java
-│   ├── UsuarioUpdateDTO.java
-│   └── SenhaUpdateDTO.java
-├── infra/
-│   ├── security/
-│   │   └── CriptografiaUtil.java      # Criptografia de senhas
-│   └── exception/
-│       └── GlobalExceptionHandler.java # Tratamento global de erros
-└── api/
-    └── UsuariosApi.java               # Contrato gerado (OpenAPI)
-
-src/main/resources/
-├── api/
-│   └── usuarios-api.yaml              # Definição OpenAPI
-└── application.yaml                   # Configurações da aplicação
-```
-
-## 🔌 API Endpoints
-
-### Base URL
-```
+```text
 http://localhost:8080/api/v1
 ```
 
 ### Autenticação
+
 ```http
 POST /auth/login
 Content-Type: application/json
-
-{
-  "login": "usuario",
-  "senha": "senha123"
-}
 ```
 
-### Usuários
+Request:
 
-#### Cadastrar Usuário
-```http
-POST /usuarios/cadastrar
-Content-Type: application/json
-
-{
-  "nome": "João Silva",
-  "login": "joao_silva",
-  "senha": "SenhaSegura@123",
-  "email": "joao@horadoprato.com",
-  "tipoUsuario": "CLIENTE",
-  "endereco": {
-    "logradouro": "Rua das Flores",
-    "numero": "123",
-    "complemento": "Apto 42",
-    "bairro": "Centro",
-    "cidade": "São Paulo",
-    "estado": "SP",
-    "cep": "01310-100"
-  }
-}
-```
-
-**Response (201):**
 ```json
 {
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "nome": "João Silva",
-  "login": "joao_silva",
-  "email": "joao@horadoprato.com"
+  "login": "joao_silva_001",
+  "senha": "SenhaSegura@123"
 }
 ```
 
-#### Buscar Usuários por Nome
+Sucesso: `200 OK` com mensagem de confirmação.
+
+Credenciais inválidas: `401 Unauthorized` com `ProblemDetail`.
+
+### Cadastro de usuário
+
+```http
+POST /usuarios/cadastrar
+```
+
+Sucesso: `201 Created`.
+
+Duplicidade de login ou e-mail: `409 Conflict` com `ProblemDetail`.
+
+### Alteração de senha
+
+```http
+PATCH /usuarios/{id}/senha
+```
+
+Sucesso: `204 No Content`.
+
+Regra de negócio violada: `409 Conflict` com `ProblemDetail`.
+
+Usuário inexistente: `404 Not Found` com `ProblemDetail`.
+
+### Atualização de dados
+
+```http
+PATCH /usuarios/{id}/atualizar
+```
+
+Sucesso: `204 No Content`.
+
+Usuário inexistente: `404 Not Found` com `ProblemDetail`.
+
+> O contrato atual permite atualizar nome, tipo de usuário e endereço, conforme implementado no serviço.
+
+### Busca por nome
+
 ```http
 GET /usuarios/buscar?nome=João
 ```
 
-**Response (200):**
-```json
-[
-  {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "nome": "João Silva",
-    "login": "joao_silva",
-    "email": "joao@horadoprato.com"
-  }
-]
-```
+Sucesso: `200 OK` com uma lista de usuários.
 
-#### Alterar Senha
-```http
-PATCH /usuarios/{id}/senha
-Content-Type: application/json
+### Deleção
 
-{
-  "senhaAntiga": "SenhaSegura@123",
-  "novaSenha": "NovaSenha@456"
-}
-```
-
-**Response (204 No Content)**
-
-#### Atualizar Dados
-```http
-PATCH /usuarios/{id}/atualizar
-Content-Type: application/json
-
-{
-  "nome": "João Silva Updated",
-  "tipoUsuario": "CLIENTE",
-  "endereco": {
-    "logradouro": "Avenida Paulista",
-    "numero": "1000",
-    "complemento": null,
-    "bairro": "Bela Vista",
-    "cidade": "São Paulo",
-    "estado": "SP",
-    "cep": "01310-100"
-  }
-}
-```
-
-**Response (204 No Content)**
-
-#### Deletar Usuário
 ```http
 DELETE /usuarios/{id}
 ```
 
-**Response (204 No Content)**
+Sucesso: `204 No Content`.
 
-## 📮 Coleção Postman
+Usuário inexistente: `404 Not Found` com `ProblemDetail`.
 
-Uma coleção completa Postman está incluída no projeto com 23 requisições cobrindo todos os cenários:
+## Contrato OpenAPI / Swagger
 
-**Arquivo:** `postman-collection.json`
+O contrato versionado da API está em:
 
-### Como importar
-
-1. Abra Postman
-2. Clique em **Import**
-3. Selecione `postman-collection.json`
-4. Na aba **Environment**, configure:
-   - `base_url`: `http://localhost:8080` (padrão)
-   - Outros campos serão preenchidos automaticamente pelos testes
-
-### Cenários cobertos
-
-**Cadastro** (6 testes)
-- ✅ Cadastro válido - Cliente
-- ✅ Cadastro válido - Dono Restaurante
-- ❌ Email duplicado
-- ❌ Login duplicado
-- ❌ Campos obrigatórios faltando
-- ❌ Tipo de usuário inválido (GARCOM)
-
-**Senha** (4 testes)
-- ✅ Alterar com sucesso
-- ❌ Senha antiga incorreta
-- ❌ Nova senha igual à anterior
-- ❌ Usuário não encontrado
-
-**Atualização** (3 testes)
-- ✅ Atualizar com sucesso
-- ❌ Usuário não encontrado
-- ❌ Tipo de usuário inválido
-
-**Busca** (3 testes)
-- ✅ Buscar por nome completo
-- ✅ Buscar por nome parcial
-- ✅ Nenhum resultado
-
-**Deleção** (2 testes)
-- ✅ Deletar com sucesso
-- ❌ Usuário não encontrado
-
-## ⚙️ Configuração de Ambiente
-
-### Variáveis de Ambiente (Docker)
-
-No `docker-compose.yml`, configure:
-
-```yaml
-environment:
-  SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/meu_banco
-  SPRING_DATASOURCE_USERNAME: java_user
-  SPRING_DATASOURCE_PASSWORD: javapassword
+```text
+src/main/resources/api/usuarios-api.yaml
 ```
 
-### Properties Locais
+O projeto utiliza OpenAPI Generator para gerar as interfaces e DTOs da API durante o build Maven.
 
-Editar `src/main/resources/application.yaml`:
+Swagger UI:
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/meu_banco
-    username: java_user
-    password: javapassword
-  jpa:
-    hibernate:
-      ddl-auto: update
-```
-
-## 📖 Documentação
-
-### Swagger UI
-
-Após iniciar a aplicação, acesse:
-```
+```text
 http://localhost:8080/swagger-ui.html
 ```
 
-### OpenAPI JSON
-```
+Documentação JSON:
+
+```text
 http://localhost:8080/v3/api-docs
 ```
 
-## 🎯 Tipos de Usuário
+As respostas de erro estão documentadas como `application/problem+json` por meio do schema `ProblemDetail`.
 
-| Tipo | Valor | Descrição |
-|---|---|---|
-| Cliente | `CLIENTE` | Usuário que faz reservas |
-| Dono de Restaurante | `DONO_RESTAURANTE` | Proprietário do restaurante |
+## Coleção Postman
 
-## ❌ Códigos de Erro
+A coleção obrigatória do Tech Challenge está versionada no projeto em:
 
-| Status | Descrição | Exemplo |
-|---|---|---|
-| 201 | Criado com sucesso | Cadastro bem-sucedido |
-| 204 | Sem conteúdo (sucesso) | Atualização, deleção |
-| 400 | Requisição inválida | Login duplicado, campo faltando |
-| 404 | Não encontrado | Usuário inexistente |
-| 500 | Erro interno | Erro no servidor |
+```text
+postman-collection.json
+```
 
-## 🔐 Segurança
+Ela cobre os principais cenários exigidos pelo enunciado:
 
-- Senhas armazenadas com **criptografia BCrypt**
-- Validação de dados de entrada
-- Tratamento robusto de exceções
-- HTTPS recomendado em produção
+### Cadastro
 
-## 🤝 Contribuição
+- Cadastro válido - Cliente;
+- Cadastro válido - Dono Restaurante;
+- E-mail duplicado;
+- Login duplicado;
+- Campos obrigatórios faltando;
+- Tipo de usuário inválido, validando o comportamento atual de erro `500`.
 
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+### Autenticação
 
-## 📝 Licença
+- Login válido;
+- Login com senha incorreta;
+- Login com usuário inexistente.
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+### Senha
 
-## 👨‍💻 Autor
+- Alteração com sucesso;
+- Senha antiga incorreta;
+- Nova senha igual à anterior;
+- Usuário inexistente.
 
-**Herson Marinho**  
-GitHub: [@hersonmarinho](https://github.com/hersonmarinho)
+### Atualização
 
-## 📞 Contato
+- Atualização com sucesso;
+- Usuário inexistente;
+- Tipo de usuário inválido, validando o comportamento atual de erro `500`.
 
-Para dúvidas ou sugestões, abra uma [issue](https://github.com/hersonmarinho/tech_challange_fiap_f1/issues).
+### Busca
+
+- Busca por nome completo;
+- Busca por nome parcial;
+- Nenhum resultado.
+
+### Deleção
+
+- Deleção com sucesso;
+- Usuário inexistente.
+
+A variável `base_url` já vem configurada para `http://localhost:8080`. Os testes de cadastro armazenam os IDs necessários para os cenários seguintes.
+
+## Tratamento de erros
+
+A aplicação utiliza `org.springframework.http.ProblemDetail` no `GlobalExceptionHandler`.
+
+| Status | Situação |
+|---|---|
+| 200 | Login válido / busca |
+| 201 | Cadastro realizado |
+| 204 | Atualização de dados, troca de senha e deleção |
+| 400 | Erros de validação de entrada tratados pelo Spring |
+| 401 | Credenciais de login inválidas |
+| 404 | Usuário não encontrado |
+| 409 | Conflitos de cadastro e regras de negócio tratadas pelas exceções específicas |
+| 500 | Exceções não tratadas pelos handlers específicos, incluindo determinados erros de desserialização do enum |
+
+## Estrutura do projeto
+
+```text
+src/main/java/br/com/fiap/horadoprato/horadoprato/
+├── controller/                 # Controllers REST
+├── controller/exception/      # Tratamento global de erros
+├── services/                   # Regras e orquestração da aplicação
+├── repositories/               # Acesso ao banco
+├── model/                      # Entidades e value objects utilizados pelo domínio
+├── dto/                        # Modelos gerados pelo contrato OpenAPI e exceções
+└── infra/security/             # Criptografia utilizada atualmente
+
+src/main/resources/
+├── api/usuarios-api.yaml       # Contrato OpenAPI
+└── application.yaml            # Configuração da aplicação
+
+postman-collection.json         # Coleção de testes Postman
+docker-compose.yml              # Orquestração app + MySQL
+Dockerfile                      # Build e runtime da aplicação
+README.md                       # Documentação do projeto
+```
+
+## Observações
+
+- O projeto da Fase 1 está concentrado em gestão de usuários e autenticação.
+- Spring Security com JWT não faz parte da implementação obrigatória desta fase.
+- A configuração de infraestrutura foi organizada para execução reproduzível por Docker Compose.
 
 ---
 
-**Última atualização:** Agosto 2026
+**Última atualização:** Agosto de 2026

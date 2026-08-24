@@ -1,0 +1,471 @@
+openapi: 3.0.3
+info:
+  title: API Hora do Prato - Serviços de Usuários e Autenticação
+  description: Contrato da API da Fase 1 do projeto Hora do Prato, contemplando cadastro, autenticação, atualização, troca de senha, busca e deleção de usuários.
+  version: 1.0.1
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor Local
+
+tags:
+  - name: Auth
+    description: Autenticação e validação de credenciais
+  - name: Usuarios
+    description: Gestão de usuários
+
+paths:
+  # Operações mapeadas do AuthService
+  /api/v1/auth/login:
+    post:
+      summary: Efetuar login e validar credenciais
+      operationId: login
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDTO'
+      responses:
+        '200':
+          description: Login efetuado com sucesso.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: Login efetuado com sucesso.
+        '401':
+          description: Credenciais inválidas.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: Credenciais inválidas
+                status: 401
+                detail: Login ou senha inválidos.
+                timestamp: '2026-08-21T23:00:00'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/usuarios/cadastrar:
+    post:
+      summary: Cadastrar um novo usuário
+      operationId: cadastrar
+      tags:
+        - Usuarios
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioRequestDTO'
+      responses:
+        '201':
+          description: Usuário cadastrado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioCadastroResponseDTO'
+              example:
+                id: 123e4567-e89b-12d3-a456-426614174000
+                nome: Carlos Alberto
+                email: carlos@horadoprato.com
+                tipoUsuario: CLIENTE
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Login ou e-mail já cadastrado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              examples:
+                loginDuplicado:
+                  summary: Login já cadastrado
+                  value:
+                    type: about:blank
+                    title: Conflito de cadastro
+                    status: 409
+                    detail: Este login já esta cadastrado no sistema!
+                    timestamp: '2026-08-21T23:00:00'
+                emailDuplicado:
+                  summary: E-mail já cadastrado
+                  value:
+                    type: about:blank
+                    title: Conflito de cadastro
+                    status: 409
+                    detail: Este e-mail já esta cadastrado no sistema!
+                    timestamp: '2026-08-21T23:00:00'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/usuarios/{id}/senha:
+    patch:
+      summary: Alterar a senha do usuário
+      operationId: alterarSenha
+      tags:
+        - Usuarios
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador único do usuário.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SenhaUpdateDTO'
+      responses:
+        '204':
+          description: Senha alterada com sucesso.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Usuário não encontrado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: Cadastro não encontrado
+                status: 404
+                detail: Usuário não encontrado!
+                timestamp: '2026-08-21T23:00:00'
+        '409':
+          description: Regra de negócio relacionada à troca de senha foi violada.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              examples:
+                senhaAtualIncorreta:
+                  summary: Senha atual incorreta
+                  value:
+                    type: about:blank
+                    title: Conflito de cadastro
+                    status: 409
+                    detail: A senha atual informada está incorreta!
+                    timestamp: '2026-08-21T23:00:00'
+                senhaIgualAnterior:
+                  summary: Nova senha idêntica à anterior
+                  value:
+                    type: about:blank
+                    title: Conflito de cadastro
+                    status: 409
+                    detail: A nova senha informada é igual a senha anterior!
+                    timestamp: '2026-08-21T23:00:00'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/usuarios/buscar:
+    get:
+      summary: Buscar usuários por nome
+      operationId: buscarPorNome
+      tags:
+        - Usuarios
+      parameters:
+        - name: nome
+          in: query
+          required: true
+          description: Filtro parcial para o nome do usuário.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de usuários encontrada.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioResponseDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/usuarios/{id}/atualizar:
+    patch:
+      summary: Atualizar dados cadastrais do usuário
+      operationId: atualizar
+      tags:
+        - Usuarios
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador único do usuário que sofrerá atualização.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioUpdateDTO'
+      responses:
+        '204':
+          description: Dados cadastrais atualizados com sucesso.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Usuário não encontrado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: Cadastro não encontrado
+                status: 404
+                detail: Usuário não encontrado!
+                timestamp: '2026-08-21T23:00:00'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/usuarios/{id}:
+    delete:
+      summary: Remover usuário
+      operationId: deletar
+      tags:
+        - Usuarios
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador único do usuário a ser deletado.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Usuário deletado com sucesso.
+        '404':
+          description: Usuário não encontrado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: Cadastro não encontrado
+                status: 404
+                detail: Usuário não encontrado!
+                timestamp: '2026-08-21T23:00:00'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  responses:
+    BadRequest:
+      description: Dados da requisição inválidos.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Dados inválidos
+            status: 400
+            detail: Dados inválidos.
+            timestamp: '2026-08-21T23:00:00'
+
+    InternalServerError:
+      description: Erro interno ou exceção não tratada por um handler específico.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Erro nao esperado!
+            status: 500
+            detail: Erro interno.
+            timestamp: '2026-08-21T23:00:00'
+
+  schemas:
+    ProblemDetail:
+      type: object
+      description: Formato de erro baseado no RFC 7807, representado pela classe org.springframework.http.ProblemDetail.
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: Tipo do problema.
+          example: about:blank
+        title:
+          type: string
+          description: Título resumido do problema.
+          example: Credenciais inválidas
+        status:
+          type: integer
+          format: int32
+          description: Código HTTP do problema.
+          example: 401
+        detail:
+          type: string
+          description: Descrição específica do problema.
+          example: Login ou senha inválidos.
+        instance:
+          type: string
+          format: uri-reference
+          description: Referência da ocorrência específica do problema.
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+          description: Momento em que o problema foi criado pelo handler.
+          example: '2026-08-21T23:00:00'
+
+    LoginDTO:
+      type: object
+      required:
+        - login
+        - senha
+      properties:
+        login:
+          type: string
+          example: joao_silva_001
+        senha:
+          type: string
+          format: password
+          example: SenhaSegura@123
+
+    UsuarioRequestDTO:
+      type: object
+      required:
+        - nome
+        - login
+        - senha
+        - email
+        - tipoUsuario
+        - endereco
+      properties:
+        nome:
+          type: string
+          example: Carlos Alberto
+        login:
+          type: string
+          example: carlos_alberto
+        senha:
+          type: string
+          format: password
+          example: MinhaSenha@2026
+        email:
+          type: string
+          format: email
+          example: carlos@horadoprato.com
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuarioEnum'
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+
+    UsuarioUpdateDTO:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Carlos Alberto Atualizado
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuarioEnum'
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+
+    SenhaUpdateDTO:
+      type: object
+      required:
+        - senhaAntiga
+        - novaSenha
+      properties:
+        senhaAntiga:
+          type: string
+          format: password
+          example: SenhaSegura@123
+        novaSenha:
+          type: string
+          format: password
+          example: NovaSenha@456
+
+    UsuarioResponseDTO:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Carlos Alberto
+        login:
+          type: string
+          example: carlos_alberto
+        email:
+          type: string
+          format: email
+          example: carlos@horadoprato.com
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuarioEnum'
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+
+    UsuarioCadastroResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        nome:
+          type: string
+          example: Carlos Alberto
+        email:
+          type: string
+          format: email
+          example: carlos@horadoprato.com
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuarioEnum'
+
+    EnderecoDTO:
+      type: object
+      required:
+        - logradouro
+        - numero
+        - bairro
+        - cidade
+        - estado
+        - cep
+      properties:
+        logradouro:
+          type: string
+          example: Avenida Paulista
+        numero:
+          type: string
+          example: '1100'
+        complemento:
+          type: string
+          nullable: true
+          example: Apto 42
+        bairro:
+          type: string
+          example: Bela Vista
+        cidade:
+          type: string
+          example: São Paulo
+        estado:
+          type: string
+          example: SP
+        cep:
+          type: string
+          example: 01310-100
+
+    TipoUsuarioEnum:
+      type: string
+      enum:
+        - CLIENTE
+        - DONO_RESTAURANTE
+      example: CLIENTE

@@ -1,0 +1,1006 @@
+{
+  "info": {
+    "_postman_id": "horadoprato-usuarios-api",
+    "name": "Hora do Prato - API Usuarios",
+    "description": "Coleção de testes para a API de Usuários do Hora do Prato, cobrindo cadastro, autenticação, alteração de senha, atualização de dados, busca, deleção e cenários de erro.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Cadastro",
+      "item": [
+        {
+          "name": "Cadastro válido - Cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response tem ID, nome, login e email', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('nome');",
+                  "    pm.expect(jsonData).to.have.property('login');",
+                  "    pm.expect(jsonData).to.have.property('email');",
+                  "    pm.environment.set('usuario_id_cliente', jsonData.id);",
+                  "    pm.environment.set('usuario_login', jsonData.login);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva\",\n  \"login\": \"joao_silva_001\",\n  \"senha\": \"SenhaSegura@123\",\n  \"email\": \"joao.silva@horadoprato.com\",\n  \"tipoUsuario\": \"CLIENTE\",\n  \"endereco\": {\n    \"logradouro\": \"Rua das Flores\",\n    \"numero\": \"123\",\n    \"complemento\": \"Apto 42\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\",\n    \"cep\": \"01310-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/cadastrar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "cadastrar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cadastro válido - Dono Restaurante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response tem ID do dono', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.environment.set('usuario_id_dono', jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Carlos Alberto\",\n  \"login\": \"carlos_dono_001\",\n  \"senha\": \"DonoSeguro@456\",\n  \"email\": \"carlos.dono@horadoprato.com\",\n  \"tipoUsuario\": \"DONO_RESTAURANTE\",\n  \"endereco\": {\n    \"logradouro\": \"Avenida Paulista\",\n    \"numero\": \"1100\",\n    \"complemento\": null,\n    \"bairro\": \"Bela Vista\",\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\",\n    \"cep\": \"01310-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/cadastrar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "cadastrar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Email duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', function () {",
+                  "pm.response.to.have.status(409);",
+                  "});",
+                  "",
+                  "pm.test('Mensagem de erro para email duplicado', function () {",
+                  "    pm.response.to.include('e-mail já esta cadastrado');",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Pedro Duplicado\",\n  \"login\": \"pedro_dup_001\",\n  \"senha\": \"Senha@789\",\n  \"email\": \"joao.silva@horadoprato.com\",\n  \"tipoUsuario\": \"CLIENTE\",\n  \"endereco\": {\n    \"logradouro\": \"Rua Teste\",\n    \"numero\": \"999\",\n    \"complemento\": null,\n    \"bairro\": \"Bairro\",\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\",\n    \"cep\": \"01310-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/cadastrar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "cadastrar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Login duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', function () {",
+                  "pm.response.to.have.status(409);",
+                  "});",
+                  "",
+                  "pm.test('Mensagem de erro para login duplicado', function () {",
+                  "    pm.response.to.include('login já esta cadastrado');",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Login Duplicado\",\n  \"login\": \"joao_silva_001\",\n  \"senha\": \"Senha@789\",\n  \"email\": \"outro.email@horadoprato.com\",\n  \"tipoUsuario\": \"CLIENTE\",\n  \"endereco\": {\n    \"logradouro\": \"Rua Teste\",\n    \"numero\": \"999\",\n    \"complemento\": null,\n    \"bairro\": \"Bairro\",\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\",\n    \"cep\": \"01310-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/cadastrar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "cadastrar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Campos obrigatórios faltando",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Teste Incompleto\",\n  \"login\": \"teste_incompleto\",\n  \"email\": \"teste@horadoprato.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/cadastrar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "cadastrar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Tipo de usuário inválido (GARCOM)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', function () {",
+                  "pm.response.to.have.status(500);",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Garcom Invalido\",\n  \"login\": \"garcom_teste\",\n  \"senha\": \"Senha@123\",\n  \"email\": \"garcom@horadoprato.com\",\n  \"tipoUsuario\": \"GARCOM\",\n  \"endereco\": {\n    \"logradouro\": \"Rua Teste\",\n    \"numero\": \"999\",\n    \"complemento\": null,\n    \"bairro\": \"Bairro\",\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\",\n    \"cep\": \"01310-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/cadastrar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "cadastrar"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Login válido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Resposta confirma login efetuado', function () {",
+                  "    pm.expect(pm.response.text()).to.include('Login efetuado com sucesso.');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{usuario_login}}\",\n  \"senha\": \"SenhaSegura@123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Login com senha incorreta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('title');",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{usuario_login}}\",\n  \"senha\": \"SenhaErrada@000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Login com usuário inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"usuario_inexistente_999\",\n  \"senha\": \"SenhaSegura@123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Senha",
+      "item": [
+        {
+          "name": "Alterar senha com sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204 No Content', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senhaAntiga\": \"SenhaSegura@123\",\n  \"novaSenha\": \"NovaSenha@456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/{{usuario_id_cliente}}/senha",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "{{usuario_id_cliente}}",
+                "senha"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Senha antiga incorreta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', function () {",
+                  "pm.response.to.have.status(409);",
+                  "});",
+                  "",
+                  "pm.test('Mensagem de erro para senha incorreta', function () {",
+                  "    pm.response.to.include('senha atual informada está incorreta');",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senhaAntiga\": \"SenhaErrada@000\",\n  \"novaSenha\": \"OutraSenha@789\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/{{usuario_id_cliente}}/senha",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "{{usuario_id_cliente}}",
+                "senha"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Nova senha igual à anterior",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', function () {",
+                  "pm.response.to.have.status(409);",
+                  "});",
+                  "",
+                  "pm.test('Mensagem de erro para senha repetida', function () {",
+                  "    pm.response.to.include('nova senha informada é igual a senha anterior');",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senhaAntiga\": \"NovaSenha@456\",\n  \"novaSenha\": \"NovaSenha@456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/{{usuario_id_cliente}}/senha",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "{{usuario_id_cliente}}",
+                "senha"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Usuário não encontrado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404 Not Found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Mensagem de usuário não encontrado', function () {",
+                  "    pm.response.to.include('não encontrado');",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senhaAntiga\": \"Senha@123\",\n  \"novaSenha\": \"Senha@456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/00000000-0000-0000-0000-000000000000/senha",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "00000000-0000-0000-0000-000000000000",
+                "senha"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Atualização de Dados",
+      "item": [
+        {
+          "name": "Atualizar dados com sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204 No Content', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva Updated\",\n  \"tipoUsuario\": \"CLIENTE\",\n  \"endereco\": {\n    \"logradouro\": \"Rua das Flores Updated\",\n    \"numero\": \"456\",\n    \"complemento\": \"Apto 100\",\n    \"bairro\": \"Vila Mariana\",\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\",\n    \"cep\": \"01310-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/{{usuario_id_cliente}}/atualizar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "{{usuario_id_cliente}}",
+                "atualizar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Usuário não encontrado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404 Not Found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Usuario Inexistente\",\n  \"tipoUsuario\": \"CLIENTE\",\n  \"endereco\": {\n    \"logradouro\": \"Rua Teste\",\n    \"numero\": \"123\",\n    \"complemento\": null,\n    \"bairro\": \"Bairro\",\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\",\n    \"cep\": \"01310-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/00000000-0000-0000-0000-000000000000/atualizar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "00000000-0000-0000-0000-000000000000",
+                "atualizar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Tipo de usuário inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', function () {",
+                  "pm.response.to.have.status(500);",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Usuario Teste\",\n  \"tipoUsuario\": \"GERENTE\",\n  \"endereco\": {\n    \"logradouro\": \"Rua Teste\",\n    \"numero\": \"123\",\n    \"complemento\": null,\n    \"bairro\": \"Bairro\",\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\",\n    \"cep\": \"01310-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/{{usuario_id_cliente}}/atualizar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "{{usuario_id_cliente}}",
+                "atualizar"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Busca",
+      "item": [
+        {
+          "name": "Buscar usuários por nome",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response é um array', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Cada resultado tem id, nome, login e email', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.length > 0) {",
+                  "        pm.expect(jsonData[0]).to.have.property('id');",
+                  "        pm.expect(jsonData[0]).to.have.property('nome');",
+                  "        pm.expect(jsonData[0]).to.have.property('login');",
+                  "        pm.expect(jsonData[0]).to.have.property('email');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/buscar?nome=João",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": "João"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar com nome parcial",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/buscar?nome=Silva",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": "Silva"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar - Nenhum resultado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response é um array vazio', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array').with.lengthOf(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/buscar?nome=XYZ123INEXISTENTE",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": "XYZ123INEXISTENTE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deleção",
+      "item": [
+        {
+          "name": "Deletar usuário com sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204 No Content', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/{{usuario_id_cliente}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "{{usuario_id_cliente}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Erro - Usuário não encontrado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404 Not Found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Resposta segue ProblemDetail', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.equal(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/usuarios/00000000-0000-0000-0000-000000000000",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "usuarios",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "usuario_id_cliente",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "usuario_id_dono",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "usuario_login",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

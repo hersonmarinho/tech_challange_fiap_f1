@@ -1,0 +1,27 @@
+package br.com.fiap.horadoprato.horadoprato.controller;
+
+import br.com.fiap.horadoprato.horadoprato.api.AuthApi;
+import br.com.fiap.horadoprato.horadoprato.dto.LoginDTO;
+import br.com.fiap.horadoprato.horadoprato.dto.exception.CredenciaisInvalidasException;
+import br.com.fiap.horadoprato.horadoprato.services.AuthService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class AuthController implements AuthApi {
+
+    private final AuthService service;
+
+    public AuthController(AuthService service) {
+        this.service = service;
+    }
+
+    @Override
+    public ResponseEntity<String> login(LoginDTO loginDTO) {
+        boolean valido = service.validarLogin(loginDTO);
+        if (!valido) {
+            throw new CredenciaisInvalidasException("Login ou senha inválidos.");
+        }
+        return ResponseEntity.ok("Login efetuado com sucesso.");
+    }
+}
